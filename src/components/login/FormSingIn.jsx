@@ -6,6 +6,7 @@ import logo from "../../assets/img/LogoApp.png";
 import { useState } from "react";
 import loginCrud from "../../api/loginCrud";
 import { useToast } from "../custom/Toast";
+import auth from "../../api/auth";
 
 function FormSingIn({ title, subtitle, onSingUp }) {
   const toast = useToast();
@@ -36,7 +37,74 @@ function FormSingIn({ title, subtitle, onSingUp }) {
     },
   ];
 
-  const handleLogin = async () => {
+  // const handleLogin = async () => {
+  //
+  //
+  //     if (response.status === 200) {
+  //       // if (result?.token) {
+  //       //   localStorage.setItem("token", result.token);
+  //       // }
+
+  //       // if (result?.accessToken) {
+  //       //   localStorage.setItem("accessToken", result.accessToken);
+  //       // }
+  //       console.log("ورود موفق");
+  //       localStorage.setItem(
+  //         "user",
+  //         JSON.stringify({
+  //           firstName: result?.data?.firstName || result?.firstName || "",
+  //           lastName: result?.data?.lastName || result?.lastName || "",
+  //         }),
+  //       );
+  //       toast.success("ورود با موفقیت انجام شد", {
+  //         title: "خوش آمدید 🎉",
+  //         duration: 1500,
+  //       });
+
+  //       // رفتن به داشبورد
+  //       setTimeout(() => {
+  //         navigate("/dashboard");
+  //       }, 1500);
+
+  //       return;
+  //     }
+  //     if (result?.error) {
+  //       const errors = Object.values(result.error).flat();
+
+  //       errors.forEach((errorMessage) => {
+  //         toast.error(errorMessage, {
+  //           title: "خطای ورود",
+  //           duration: 6000,
+  //         });
+  //       });
+
+  //       return;
+  //     }
+  //     if (result?.message) {
+  //       toast.error(result.message, {
+  //         title: "ورود ناموفق",
+  //         duration: 6000,
+  //       });
+
+  //       return;
+  //     }
+  //     toast.error("شماره موبایل یا رمز عبور صحیح نیست", {
+  //       title: "ورود ناموفق",
+  //       duration: 6000,
+  //     });
+  //   } catch (error) {
+  //     console.error("Login Error:", error);
+
+  //     toast.error(error.message || "خطایی هنگام ورود رخ داد", {
+  //       title: "خطای ورود",
+  //       duration: 6000,
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const setToken = async () => {
     if (loading) return;
 
     try {
@@ -59,47 +127,54 @@ function FormSingIn({ title, subtitle, onSingUp }) {
       }
 
       const data = {
-        phoneNumber: formData.phoneNumber.trim(),
+        login: formData.phoneNumber.trim(),
         password: formData.password,
       };
 
-      console.log("Login Payload:", data);
-
-      const response = await loginCrud.loginUser(data);
-
+      const response = await auth.getTokenLogin(data);
       const result = await response.json().catch(() => null);
 
       console.log("Login Status:", response.status);
       console.log("Login Response:", result);
 
-      if (response.status === 200) {
-        // if (result?.token) {
-        //   localStorage.setItem("token", result.token);
-        // }
+      // لاگین موفق
+      if (response.status === 200 && result?.success === true) {
+        const {
+          accessToken,
+          refreshToken,
+          accessTokenExpireTime,
+          refreshTokenExpireTime,
+          user,
+        } = result.data;
 
-        // if (result?.accessToken) {
-        //   localStorage.setItem("accessToken", result.accessToken);
-        // }
-        console.log("ورود موفق");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            firstName: result?.data?.firstName || result?.firstName || "",
-            lastName: result?.data?.lastName || result?.lastName || "",
-          }),
-        );
+        // ذخیره توکن‌ها
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        // ذخیره زمان انقضا
+        localStorage.setItem("accessTokenExpireTime", accessTokenExpireTime);
+
+        localStorage.setItem("refreshTokenExpireTime", refreshTokenExpireTime);
+
+        // ذخیره اطلاعات کاربر
+        localStorage.setItem("user", JSON.stringify(user));
+
+        console.log("Access Token:", accessToken);
+        console.log("Refresh Token:", refreshToken);
+
         toast.success("ورود با موفقیت انجام شد", {
           title: "خوش آمدید 🎉",
           duration: 1500,
         });
 
-        // رفتن به داشبورد
         setTimeout(() => {
           navigate("/dashboard");
         }, 1500);
 
         return;
       }
+
+      // خطا
       if (result?.error) {
         const errors = Object.values(result.error).flat();
 
@@ -112,14 +187,7 @@ function FormSingIn({ title, subtitle, onSingUp }) {
 
         return;
       }
-      if (result?.message) {
-        toast.error(result.message, {
-          title: "ورود ناموفق",
-          duration: 6000,
-        });
 
-        return;
-      }
       toast.error("شماره موبایل یا رمز عبور صحیح نیست", {
         title: "ورود ناموفق",
         duration: 6000,
@@ -202,7 +270,7 @@ function FormSingIn({ title, subtitle, onSingUp }) {
         <div className="px-2">
           <button
             type="button"
-            onClick={handleLogin}
+            onClick={setToken}
             disabled={loading}
             className="relative w-full h-14 cursor-pointer rounded-xl font-[Vazir] bg-violet-800 text-lg font-bold text-white flex items-center justify-center overflow-hidden transition-all duration-300 hover:bg-violet-900 hover:shadow-lg hover:shadow-violet-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-90
             "

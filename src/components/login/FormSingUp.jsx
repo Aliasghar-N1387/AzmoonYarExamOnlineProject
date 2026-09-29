@@ -4,11 +4,10 @@ import BtnDataForm from "./BtnDataForm";
 import GoogleIcon from "../../assets/img/Google-icon.png";
 import loginCrud from "../../api/loginCrud";
 import { useToast } from "../custom/Toast";
+import auth from "../../api/auth";
 
-function FormSingUp({ title, subtitle, onLogin }) {
+function FormSingUp({ title, subtitle, onLogin, onSuccess }) {
   const toast = useToast();
-
-  const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -48,7 +47,7 @@ function FormSingUp({ title, subtitle, onLogin }) {
     {
       id: 4,
       name: "email",
-      lable: "ایمیل (اختیاری)",
+      lable: "ایمیل ( اختیاری )",
       backIcon: <Mail className="size-5" />,
     },
     {
@@ -73,7 +72,6 @@ function FormSingUp({ title, subtitle, onLogin }) {
     try {
       setLoading(true);
 
-      // بررسی تکرار رمز عبور
       if (formData.password !== formData.confirmPassword) {
         toast.error("رمز عبور و تکرار رمز عبور یکسان نیستند", {
           title: "خطای رمز عبور",
@@ -92,18 +90,15 @@ function FormSingUp({ title, subtitle, onLogin }) {
 
       console.log("Register Payload:", data);
 
-      const response = await loginCrud.registerUserSingUp(data);
+      const response = await auth.registerUserSingUp(data);
       const result = await response.json().catch(() => null);
 
       console.log("Register Response:", result);
 
-      // اگر درخواست ناموفق بود
       if (!response.ok) {
-        // اگر بک‌اند خطاهای validation فرستاده
         if (result?.error) {
           const errors = Object.values(result.error).flat();
 
-          // هر خطا در یک Toast جدا
           errors.forEach((errorMessage) => {
             toast.error(errorMessage, {
               title: "خطای اعتبارسنجی",
@@ -114,7 +109,6 @@ function FormSingUp({ title, subtitle, onLogin }) {
           return;
         }
 
-        // اگر بک‌اند فقط message فرستاده
         if (result?.message) {
           toast.error(result.message, {
             title: "ثبت نام ناموفق",
@@ -124,7 +118,6 @@ function FormSingUp({ title, subtitle, onLogin }) {
           return;
         }
 
-        // خطای پیش‌فرض
         toast.error("ثبت نام انجام نشد", {
           title: "ثبت نام ناموفق",
           duration: 6000,
@@ -142,8 +135,7 @@ function FormSingUp({ title, subtitle, onLogin }) {
         }),
       );
 
-      setSuccess(true);
-
+      onSuccess?.();
       // انتقال به صفحه ورود
       setTimeout(() => {
         onLogin?.();
@@ -169,45 +161,6 @@ function FormSingUp({ title, subtitle, onLogin }) {
 
   return (
     <div className="absolute -left-50 top-10 bg-white rounded-3xl w-150 min-h-200 p-7 shadow-[0_0_45px_rgba(0,0,0,0.3)]">
-      {success && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-[450px] max-w-full rounded-3xl bg-white p-8 text-center shadow-2xl">
-       
-            <div className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-green-100">
-              <svg
-                className="size-10 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-
-            <h2 className="font-[Vazir] text-2xl font-extrabold text-gray-900">
-              ثبت نام موفق بود 🎉
-            </h2>
-
-            <p className="mt-3 font-[Vazir] font-bold text-gray-500">
-              شما با موفقیت ثبت نام کردید
-            </p>
-
-            <p className="mt-2 font-[Vazir] text-sm text-gray-400">
-              در حال انتقال به صفحه ورود...
-            </p>
-
-            {/* Progress */}
-            <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
-              <div className="h-full w-full origin-right animate-[progress_2.5s_linear] rounded-full bg-green-500" />
-            </div>
-          </div>
-        </div>
-      )}
       <div className="w-full">
         {/* Title */}
         <div className="py-2 flex items-center justify-center flex-col">
@@ -275,118 +228,27 @@ function FormSingUp({ title, subtitle, onLogin }) {
             type="button"
             onClick={handleSignUp}
             disabled={loading}
-            className="
-              relative
-              w-full
-              h-12
-              cursor-pointer
-              rounded-xl
-              font-[Vazir]
-              bg-violet-800
-              text-lg
-              font-bold
-              text-white
-              flex
-              items-center
-              justify-center
-              overflow-hidden
-              transition-all
-              duration-300
-              hover:bg-violet-900
-              hover:shadow-lg
-              hover:shadow-violet-200
-              active:scale-[0.97]
-              disabled:cursor-not-allowed
-              disabled:opacity-90
+            className="relative w-full h-12 cursor-pointer rounded-xl font-[Vazir] bg-violet-800 text-lg font-bold text-white flex items-center justify-center overflow-hidden transition-all duration-300 hover:bg-violet-900 hover:shadow-lg hover:shadow-violet-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-90
             "
           >
             <span
-              className={`
-                absolute
-                transition-all
-                duration-300
-                ${
-                  loading
-                    ? "opacity-0 scale-75 translate-y-3"
-                    : "opacity-100 scale-100 translate-y-0"
-                }
-              `}
+              className={`absolute transition-all duration-300 ${loading ? "opacity-0 scale-75 translate-y-3" : "opacity-100 scale-100 translate-y-0"} `}
             >
               ثبت نام
             </span>
 
             <div
-              className={`
-                flex
-                items-center
-                gap-3
-                transition-all
-                duration-300
-                ${loading ? "opacity-100 scale-100" : "opacity-0 scale-75"}
-              `}
+              className={`flex items-center gap-3 transition-all duration-300 ${loading ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
             >
-              <span
-                className="
-                  w-5
-                  h-5
-                  border-2
-                  border-white/40
-                  border-t-white
-                  rounded-full
-                  animate-spin
-                "
-              />
+              <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
 
               <span>...در حال ثبت نام</span>
             </div>
           </button>
-
-          <div className="px-2 py-10 relative flex items-center">
-            <hr className="w-full border-gray-300" />
-
-            <p className="font-[Vazir] bg-white absolute left-1/2 -translate-x-1/2 px-5 text-gray-600">
-              یا
-            </p>
-          </div>
-
-          {/* Google signup */}
-          <button
-            type="button"
-            className="
-              w-full
-              h-12
-              rounded-lg
-              font-[Vazir]
-              bg-white
-              border-2
-              border-gray-400
-              text-lg
-              font-bold
-              text-gray-600
-              flex
-              justify-center
-              items-center
-              cursor-pointer
-              transition-all
-              duration-300
-              hover:border-violet-500
-              hover:text-violet-800
-              hover:bg-violet-50
-              active:scale-[0.98]
-            "
-          >
-            <img
-              src={GoogleIcon}
-              alt="Google"
-              className="size-6 object-contain"
-            />
-
-            <span className="pl-2.5">ثبت نام با گوگل</span>
-          </button>
         </div>
 
         {/* Login link */}
-        <div className="flex items-center justify-center mt-4">
+        <div className="flex items-center justify-center pt-10">
           <span className="font-[Vazir] font-bold text-gray-700">
             قبلاً حساب کاربری دارید؟{" "}
             <a

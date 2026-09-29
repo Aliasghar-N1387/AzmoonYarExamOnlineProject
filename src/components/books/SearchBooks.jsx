@@ -7,7 +7,7 @@ function SearchBooks() {
       <input
         type="text"
         placeholder="جستجو در كتاب ها"
-        className="w-80 text-right pr-10 h-10 rounded-lg border border-gray-300 text-gray-500 font-bold text-sm focus: outline-none"
+        className="w-84 text-right pr-10 h-10 rounded-lg border border-gray-200 dark:bg-slate-900 dark:text-white text-gray-500 font-bold text-sm focus: outline-none"
       />
       <Search size={16} className="absolute right-3 text-gray-500 top-2" />
     </div>

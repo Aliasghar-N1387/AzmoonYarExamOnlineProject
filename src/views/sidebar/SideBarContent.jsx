@@ -1,12 +1,9 @@
 import React from "react";
 import logo from "../../assets/img/LogoApp.png";
 import {
-  Book,
   CircleQuestionMark,
-  ClipboardClock,
   ClipboardList,
   ClipboardPlus,
-  GraduationCap,
   Home,
   LibraryBig,
   ChevronRight,
@@ -16,10 +13,11 @@ import {
   Settings,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
-
 import bgsidebar from "../../assets/img/sidebar-img.png";
+import bgsidbarDark from "../../assets/img/sidbar-dark.png"
 
-function SideBarContent({ collapsed, setCollapsed }) {
+
+function SideBarContent({ collapsed, setCollapsed, darkMode }) {
   const menuItemSidebar = [
     {
       id: 1,
@@ -78,35 +76,34 @@ function SideBarContent({ collapsed, setCollapsed }) {
   ];
 
   const location = useLocation();
+  const navigate = useNavigate();
+
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
   };
 
-  const navigate = useNavigate();
-
   return (
     <div
-      className="flex h-full flex-col bg-cover bg-center bg-no-repeat px-3 py-4 transition-all duration-300"
+      className="flex h-full flex-col bg-violet-50 dark:bg-slate-950 bg-cover bg-center bg-no-repeat px-3 py-4 transition-all duration-300"
       dir="rtl"
       style={{
-        backgroundImage: `url(${bgsidebar})`,
+        backgroundImage: darkMode ? `url(${bgsidbarDark}` : `url(${bgsidebar})`,
       }}
     >
-      {/* Header Sidebar */}
       <div className="flex justify-center py-2 mb-4 text-right">
         {!collapsed && (
           <div className="mt-4">
-            <h1 className="font-[Vazir] text-violet-900 text-xl font-extrabold">
+            <h1 className="font-[Vazir] text-violet-900 dark:text-white text-xl font-extrabold transition-colors duration-300">
               آزمون یار
             </h1>
-
-            <p className="font-[Vazir] text-violet-700 text-sm font-bold">
+            <p className="font-[Vazir] text-violet-700 dark:text-gray-300 text-sm font-bold transition-colors duration-300">
               AzmoonYar
             </p>
           </div>
         )}
+
         <div
-          className="w-20 h-18 bg-violet-900"
+          className="w-20 h-18 bg-violet-900 dark:bg-white transition-colors duration-300"
           style={{
             WebkitMaskImage: `url(${logo})`,
             WebkitMaskRepeat: "no-repeat",
@@ -120,30 +117,43 @@ function SideBarContent({ collapsed, setCollapsed }) {
         ></div>
       </div>
 
-      {/* Content SideBar */}
-      <div className="">
+      <div>
         <ul>
           {menuItemSidebar.map((menu) => {
             const isActive =
               menu.id === 1
                 ? location.pathname === "/dashboard"
                 : location.pathname === `/dashboard/${menu.router}`;
+
             return (
               <li
                 key={menu.id}
                 onClick={() => navigate(menu.router)}
-                className={`flex transition-all duration-250 cursor-pointer group items-center rounded-lg py-1.5 px-1 mt-4 ${isActive ? "bg-violet-900" : "bg-linear-to-r hover:from-white hover:to-violet-200  "} ${collapsed ? "justify-center" : "gap-3"}`}
+                className={`flex transition-all duration-300 cursor-pointer group items-center rounded-lg py-1.5 px-1 mt-4 ${
+                  isActive
+                    ? "bg-violet-900 dark:bg-linear-to-br dark:from-violet-950/50 dark:to-violet-900 shadow-md shadow-violet-900/20 dark:shadow-violet-950/40"
+                    : "hover:bg-linear-to-br hover:from-transparent hover:to-violet-200 dark:hover:from-transparent dark:hover:to-slate-700"
+                } ${collapsed ? "justify-center" : "gap-3"}`}
               >
                 <span
-                  className={`p-1 rounded-lg transition-all duration-300 ${isActive ? "bg-gray-100 text-violet-900 shadow-sm shadow-gray-300" : "text-violet-900 group-hover:bg-gray-100 group-hover:shadow-sm group-hover:shadow-violet-200"}`}
+                  className={`p-1 rounded-lg transition-all duration-300 ${
+                    isActive
+                      ? "bg-gray-100 text-violet-900 dark:bg-slate-800 dark:text-white shadow-sm shadow-gray-300/30 dark:shadow-slate-950/50"
+                      : "text-violet-900 dark:text-white group-hover:bg-gray-100 dark:group-hover:bg-slate-900 group-hover:shadow-sm group-hover:shadow-violet-200 dark:group-hover:shadow-slate-950/50"
+                  }`}
                 >
                   <span className="block transition-transform duration-300 group-hover:scale-110">
                     {menu.iconMenu}
                   </span>
                 </span>
+
                 {!collapsed && (
                   <span
-                    className={`font-bold text-sm ${isActive ? "text-white" : "text-violet-900"}`}
+                    className={`font-bold text-sm transition-colors duration-300 ${
+                      isActive
+                        ? "text-white"
+                        : "text-violet-900 dark:text-slate-300"
+                    }`}
                   >
                     {menu.name}
                   </span>
@@ -154,28 +164,27 @@ function SideBarContent({ collapsed, setCollapsed }) {
         </ul>
       </div>
 
-      {/* Footer SideBar */}
       <div className="mt-auto">
-        {/* Exit Button */}
         <button
-          className={`flex w-full py-2.5 pt-3 px-2 cursor-pointer ${
+          className={`flex w-full py-2.5 pt-3 px-2 cursor-pointer rounded-lg transition-all duration-300 hover:bg-rose-500/20 ${
             collapsed ? "justify-center" : "gap-3"
           }`}
         >
           <LogOut
             size={18}
-            className="transition-transform text-rose-700 duration-300"
+            className="transition-transform text-rose-700 dark:text-rose-400 duration-300"
           />
 
           {!collapsed && (
-            <span className="mr-2 font-bold text-sm text-rose-700">خروج</span>
+            <span className="mr-2 font-bold text-sm text-rose-700 dark:text-rose-400">
+              خروج
+            </span>
           )}
         </button>
 
-        {/* Collapse Button */}
         <button
           onClick={toggleCollapse}
-          className={`flex w-full py-2.5 pt-3 px-2 border-t border-gray-300 cursor-pointer ${
+          className={`flex w-full py-2.5 pt-3 px-2 border-t border-gray-300 dark:border-slate-800 cursor-pointer transition-all duration-300 ${
             collapsed ? "justify-center" : "gap-3"
           }`}
         >
@@ -187,12 +196,14 @@ function SideBarContent({ collapsed, setCollapsed }) {
             <ChevronRight
               size={18}
               strokeWidth={3}
-              className="text-violet-900"
+              className="text-violet-900 dark:text-violet-400 transition-colors duration-300"
             />
           </span>
 
           {!collapsed && (
-            <span className="mr-2 font-bold text-sm text-violet-900">بستن</span>
+            <span className="mr-2 font-bold text-sm text-violet-900 dark:text-slate-300 transition-colors duration-300">
+              بستن
+            </span>
           )}
         </button>
       </div>

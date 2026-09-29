@@ -5,7 +5,7 @@ function DashboardLoading() {
   return (
     <div
       dir="rtl"
-      className="min-h-190 flex items-center justify-center bg-violet-50/50"
+      className="min-h-190 flex items-center justify-center bg-violet-50/50 dark:bg-slate-950"
     >
       <div className="flex flex-col items-center gap-6">
         {/* Logo Loading */}

@@ -45,33 +45,33 @@ function CalendarDate() {
 
   return (
     <div
-      className="bg-white border border-gray-300 rounded-lg p-5 w-100 text-right"
+      className="bg-white border border-gray-300 rounded-lg p-5 w-100 text-right dark:bg-slate-900 dark:border-slate-700"
       dir="rtl"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={nextMonth}
-          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500"
+          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 dark:text-white"
         >
           <ChevronRight size={16} />
         </button>
 
-        <div className="flex items-center gap-2 text-gray-800 font-bold text-sm">
+        <div className="flex items-center gap-2 text-gray-800 font-bold text-sm dark:text-white">
           <CalendarDays size={16} className="text-violet-600" />
           {months[month]} {year}
         </div>
 
         <button
           onClick={prevMonth}
-          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500"
+          className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 dark:text-white"
         >
           <ChevronLeft size={16} />
         </button>
       </div>
 
       {/* Week */}
-      <div className="grid grid-cols-7 text-center text-[11px] text-gray-400 mb-2">
+      <div className="grid grid-cols-7 text-center text-[11px] text-gray-400 mb-2 dark:text-white">
         {weeks.map((day) => (
           <span key={day}>{day}</span>
         ))}
@@ -87,8 +87,8 @@ function CalendarDate() {
 
               ${
                 selectedDay === day
-                  ? "bg-violet-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-violet-50"
+                  ? "bg-violet-600 text-white shadow-sm dark:text-white"
+                  : "text-gray-600 hover:bg-violet-50 dark:hover:bg-violet-900 dark:text-white"
               }
             `}
           >

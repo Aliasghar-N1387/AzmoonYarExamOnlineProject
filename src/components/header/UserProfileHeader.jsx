@@ -35,7 +35,7 @@ function UserProfileHeader() {
 
         {/* Name & Job */}
         <div className="flex flex-col items-start gap-1">
-          <span className="w-30 truncate text-sm font-bold text-gray-900">
+          <span className="w-30 truncate text-sm font-bold text-gray-900 dark:text-white">
             {firstName} {lastName}
           </span>
 

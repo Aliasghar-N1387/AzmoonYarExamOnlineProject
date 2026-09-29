@@ -125,17 +125,6 @@ function BookContent() {
     12: "دوازدهم",
   };
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files?.[0];
-
-  //   if (!file) return;
-
-  //   setBookImage(file);
-
-  //   const imageUrl = URL.createObjectURL(file);
-  //   setPreviewImage(imageUrl);
-  // };
-
   const handleLessonCountChange = (e) => {
     const count = Math.max(0, Number(e.target.value) || 0);
 
@@ -260,7 +249,7 @@ function BookContent() {
   };
 
   return (
-    <div className="p-6 h-full bg-violet-50/50">
+    <div className="p-6 h-full bg-violet-50/50 dark:bg-slate-950">
       {/* Header  */}
       <div className="flex pl-10 justify-between text-right">
         <div className="flex justify-center items-center gap-4">
@@ -280,15 +269,14 @@ function BookContent() {
 
         <div className="flex gap-6">
           <div>
-            <p className="text-2xl font-bold">کتاب ها</p>
-            <p className="text-md">
-              {" "}
+            <p className="text-2xl font-bold text-white">کتاب ها</p>
+            <p className="text-md dark:text-white">
               . کتاب های درسی خود را مدیريت كنيد وبرای هر كتاب، درس ها وسوالات
               را تعريف نمابيد
             </p>
           </div>
           <div className="flex justify-center items-center">
-            <BookOpen className="size-10 text-violet-700" />
+            <BookOpen className="size-10 text-violet-700 dark:text-shadow-sm dark:text-shadow-violet-500" />
           </div>
           <div className=""></div>
         </div>
@@ -309,9 +297,10 @@ function BookContent() {
                 grade={`پایه ${gradeBooks[book.grade] || book.grade}`}
                 field={book.bookSource === 1 ? "کتاب درسی" : "سایر منابع"}
                 level=""
-                image={null}
+                image={book.picture}
                 lessons={book.lessons?.length || 0}
                 questions={0}
+                onOpenModal={() => setIsModalOpen(true)}
               />
             </div>
           );
@@ -319,9 +308,9 @@ function BookContent() {
       </div>
       {/* Book Page Next -  Previous */}
       <div className="flex items-center justify-between px-10 mt-8">
-        <p className="text-sm text-gray-500">
-          تعداد کل کتاب‌ها:{" "}
-          <span className="font-bold text-violet-700">{totalCount}</span>
+        <p className="text-sm text-gray-500 dark:text-white">
+          تعداد کل کتاب‌ها : 
+          <span className="font-bold text-violet-700 "> {totalCount} </span>
         </p>
 
         <div className="flex items-center gap-2">
@@ -329,7 +318,7 @@ function BookContent() {
             type="button"
             onClick={() => getBooks(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="rounded-lg border bg-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border bg-white dark:bg-violet-950 dark:text-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
             قبلی
           </button>
@@ -344,7 +333,7 @@ function BookContent() {
                 onClick={() => getBooks(page)}
                 className={`h-8 w-8 rounded-lg text-sm ${
                   currentPage === page
-                    ? "bg-violet-700 text-white"
+                    ? "bg-violet-700 text-white dark:bg-violet-950 dark:border dark:border-white"
                     : "border bg-white text-gray-600"
                 }`}
               >
@@ -357,7 +346,7 @@ function BookContent() {
             type="button"
             onClick={() => getBooks(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="rounded-lg border bg-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border bg-white dark:bg-violet-950 dark:text-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
             بعدی
           </button>

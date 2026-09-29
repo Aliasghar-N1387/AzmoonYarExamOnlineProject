@@ -22,6 +22,10 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("darkMode") === "true",
+  );
+
   useEffect(() => {
     const getDashboardData = async () => {
       try {
@@ -59,36 +63,38 @@ function DashboardContent() {
   }
 
   return (
-    <div className="p-6 h-full pb-0 bg-violet-50/50">
+    <div className="p-6 h-full pb-0 bg-violet-50/50 dark:bg-slate-950">
       {/* Card Info */}
       <div>
-        <CardInformation Cardinfo={data} />
+        <CardInformation Cardinfo={data} darkMode={darkMode} />
       </div>
 
-      <div className="mt-5 flex gap-10 justify-center items-center">
+      <div className="mt-8 flex gap-10 justify-center items-center">
         {/* Rapid Card */}
-        <div className="relative px-15 py-2 rounded-lg border border-gray-300 text-right w-full">
-          <p className="flex justify-end gap-3 text-sm font-bold my-2.5">
+        <div
+          className="relative px-15 py-3 rounded-lg border border-gray-300 text-right w-full dark:border-slate-700 bg-white
+           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+        >
+          <p className="flex justify-end gap-3 text-sm font-bold my-2.5 dark:text-white">
             عملیات سریع
-            <Zap className="size-4 text-violet-900" />
+            <Zap className="size-4 text-violet-900 dark:text-white" />
           </p>
 
-          <div>
+          <div className="">
             <RapidOperation />
           </div>
         </div>
 
         {/* Linear Chart */}
-        <div className="relative rounded-lg border border-gray-300">
+        <div
+          className="relative rounded-lg border border-gray-300  dark:border-slate-700 bg-white
+           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+        >
           <div className="absolute top-2 right-10 flex justify-between">
-            <p className="flex items-center gap-3 text-sm font-bold mt-2.5">
+            <p className="flex items-center gap-3 text-sm font-bold mt-2.5 dark:text-white">
               روند فعالیت
-              <ActivityIcon className="size-4 text-violet-900" />
+              <ActivityIcon className="size-4 text-violet-900 dark:text-white" />
             </p>
-
-            <div className="w-30 absolute right-75">
-              <DropDown placeholder="ماه گذشته" />
-            </div>
           </div>
 
           <div className="mt-10">
@@ -97,10 +103,13 @@ function DashboardContent() {
         </div>
 
         {/* Donut Chart */}
-        <div className="relative rounded-lg border border-gray-300">
-          <p className="absolute top-2 right-10 flex items-center gap-3 text-sm font-bold mt-2.5">
+        <div
+          className="relative rounded-lg border border-gray-300  dark:border-slate-700 bg-white
+           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+        >
+          <p className="absolute top-2 right-10 flex items-center gap-3 text-sm font-bold mt-2.5 dark:text-white">
             سوالات براساس نوع
-            <ChartPie className="size-4 text-violet-900" />
+            <ChartPie className="size-4 text-violet-900 dark:text-white" />
           </p>
 
           <div className="mt-10">
@@ -109,7 +118,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      <div className="mt-5 flex gap-17.5 justify-center items-center">
+      <div className="mt-8 flex gap-17.5 justify-center items-center">
         <div>
           <LatestActivities Cardinfo={data} />
         </div>

@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
+const accessToken = localStorage.getItem("accessToken");
 
 const getActivityLogs = async ({ search = "", activityType = "" } = {}) => {
   const params = new URLSearchParams();
@@ -13,6 +14,10 @@ const getActivityLogs = async ({ search = "", activityType = "" } = {}) => {
 
   return await fetch(`${API_URL}v1/activity-log?${params.toString()}`, {
     method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 };
 

@@ -150,15 +150,16 @@ function LatestActivities({ Cardinfo }) {
   return (
     <>
       <div
-        className="bg-white rounded-lg border border-gray-300 p-6 text-right h-65"
+        className="bg-white rounded-lg border border-gray-300 p-6 text-right h-65  dark:border-slate-700
+           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
         dir="rtl"
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Activity className="text-violet-900 size-4" />
+            <Activity className="text-violet-900 size-4 dark:text-white" />
 
-            <h2 className="font-bold text-gray-800 text-sm">آخرین فعالیت‌ها</h2>
+            <h2 className="font-bold text-gray-800 text-sm dark:text-white">آخرین فعالیت‌ها</h2>
           </div>
         </div>
 
@@ -174,14 +175,14 @@ function LatestActivities({ Cardinfo }) {
                   className="flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-violet-50 flex items-center justify-center">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-violet-50 flex items-center justify-center dark:bg-violet-950">
                       <Icon
                         size={20}
                         className={getActivityIconStyle(item.message)}
                       />
                     </div>
 
-                    <p className="text-xs text-gray-700 font-medium">
+                    <p className="text-xs text-gray-700 font-medium dark:text-white">
                       {item.message}
                     </p>
                   </div>
@@ -218,9 +219,9 @@ function LatestActivities({ Cardinfo }) {
           header={
             <div>
               <div className="flex items-center gap-3">
-                <Activity className="text-violet-600" size={25} />
+                <Activity className="text-violet-600 dark:text-white" size={25} />
 
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-xl dark:text-white font-bold text-gray-800">
                   همه فعالیت‌ها
                 </h2>
               </div>
@@ -238,7 +239,7 @@ function LatestActivities({ Cardinfo }) {
                 <div className="relative flex-1">
                   <Search
                     size={18}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white"
                   />
 
                   <input
@@ -246,14 +247,14 @@ function LatestActivities({ Cardinfo }) {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="جستجو در فعالیت‌ها..."
-                    className="h-11 w-full rounded-xl border border-gray-200 bg-white pr-11 pl-4 text-sm outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                    className="h-11 w-full rounded-xl border border-gray-200 bg-white dark:bg-slate-900 dark:text-white pr-11 pl-4 text-sm outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                   />
 
                   {search && (
                     <button
                       type="button"
                       onClick={() => setSearch("")}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white hover:text-gray-700"
                     >
                       <X size={16} />
                     </button>
@@ -277,16 +278,6 @@ function LatestActivities({ Cardinfo }) {
                   </div>
                 </div>
               </div>
-
-              {/* Loading */}
-              {loading && (
-                <div className="flex justify-center py-4">
-                  <p className="text-xs text-gray-400">
-                    در حال دریافت اطلاعات...
-                  </p>
-                </div>
-              )}
-
               {/* Activity Count */}
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-xs text-gray-400">
@@ -300,7 +291,7 @@ function LatestActivities({ Cardinfo }) {
                       setSearch("");
                       setFilter(null);
                     }}
-                    className="text-xs font-medium text-violet-600 hover:text-violet-800"
+                    className="text-xs font-medium text-violet-600 hover:text-violet-800 transition-all dark:text-white dark:hover:text-gray-400"
                   >
                     حذف فیلترها
                   </button>
@@ -316,10 +307,10 @@ function LatestActivities({ Cardinfo }) {
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/50 p-4 transition hover:border-violet-100 hover:bg-violet-50/30"
+                          className="flex items-center justify-between rounded-2xl border border-gray-100 bg-gray-50/50 dark:bg-violet-950 p-4 transition hover:border-violet-100 hover:bg-violet-50/30"
                         >
                           <div className="flex items-center gap-4 min-w-0">
-                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white  shadow-sm">
                               <Icon
                                 size={20}
                                 className={getActivityIconStyle(item.message)}
@@ -327,17 +318,17 @@ function LatestActivities({ Cardinfo }) {
                             </div>
 
                             <div className="min-w-0">
-                              <p className="text-sm font-bold text-gray-700">
+                              <p className="text-sm font-bold text-gray-700 dark:text-white">
                                 {item.message}
                               </p>
 
-                              <p className="mt-1 text-xs text-gray-400">
+                              <p className="mt-1 text-xs text-gray-400 dark:text-gray-300">
                                 {getRelativeTime(item.createdAt)}
                               </p>
                             </div>
                           </div>
 
-                          <span className="mr-4 shrink-0 rounded-lg bg-violet-50 px-3 py-1.5 text-[11px] font-bold text-violet-600">
+                          <span className="mr-4 shrink-0 rounded-lg bg-violet-50 dark:bg-slate-900 dark:text-white px-3 py-1.5 text-[11px] font-bold text-violet-600">
                             فعالیت
                           </span>
                         </div>
@@ -345,11 +336,11 @@ function LatestActivities({ Cardinfo }) {
                     })
                   : !loading && (
                       <div className="flex flex-col items-center justify-center py-16">
-                        <div className="flex size-14 items-center justify-center rounded-2xl bg-gray-50">
+                        <div className="flex size-14 items-center justify-center rounded-2xl bg-gray-50 dark:bg-violet-950  dark:border dark:border-white">
                           <Activity size={25} className="text-gray-300" />
                         </div>
 
-                        <p className="mt-4 text-sm font-bold text-gray-500">
+                        <p className="mt-4 text-sm font-bold text-gray-500 dark:text-white">
                           فعالیتی پیدا نشد
                         </p>
 
@@ -370,7 +361,7 @@ function LatestActivities({ Cardinfo }) {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="h-11 rounded-xl bg-violet-700 px-7 text-sm font-bold text-white transition hover:bg-violet-800"
+                className="h-11 ml-3 rounded-xl bg-violet-700 dark:bg-violet-900 px-7 text-sm font-bold text-white transition hover:bg-violet-800"
               >
                 بستن
               </button>
