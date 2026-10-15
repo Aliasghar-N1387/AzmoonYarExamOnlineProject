@@ -19,7 +19,7 @@ function QuestionTypeChart({ Cardinfo }) {
     6: "#FBBF24",
   };
 
-  const chartData = Cardinfo.questionTypeCounts.map((item) => ({
+  const chartData = (Cardinfo?.questionTypeCounts ?? []).map((item) => ({
     id: item.questionType,
     label: questionTypeNames[item.questionType] || "نامشخص",
     value: item.questionCount,
@@ -30,16 +30,22 @@ function QuestionTypeChart({ Cardinfo }) {
     <div className="flex items-center justify-between gap-8">
       {/* Chart */}
       <div className="h-70 p-10 w-70">
-        <ResponsivePie
-          data={chartData}
-          innerRadius={0.65}
-          padAngle={1}
-          cornerRadius={3}
-          colors={(item) => item.data.color}
-          enableArcLabels={false}
-          enableArcLinkLabels={false}
-          animate={true}
-        />
+        {chartData.length === 0 ? (
+          <div className="flex h-70 w-70 items-center justify-center text-sm text-gray-400">
+            داده‌ای برای نمایش وجود ندارد
+          </div>
+        ) : (
+          <ResponsivePie
+            data={chartData}
+            innerRadius={0.65}
+            padAngle={1}
+            cornerRadius={3}
+            colors={(item) => item.data.color}
+            enableArcLabels={false}
+            enableArcLinkLabels={false}
+            animate
+          />
+        )}
       </div>
 
       {/* Legend */}

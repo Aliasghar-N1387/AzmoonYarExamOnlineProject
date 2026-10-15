@@ -92,7 +92,7 @@ function SelectBox({
                     e.stopPropagation();
                     selectItem(item);
                   }}
-                  className="flex dark:text-white items-center justify-between rounded-lg px-3 py-2.5 text-xs text-gray-700 cursor-pointer transition-all hover:bg-gray-300 hover:text-violet-700  dark:hover:bg-slate-900 dark:hover:text-white active:scale-95
+                  className="flex dark:text-white items-center justify-between rounded-lg px-3 py-2.5 text-xs text-gray-700 cursor-pointer transition-all hover:bg-gray-200 hover:text-gray-600  dark:hover:bg-slate-900 dark:hover:text-white active:scale-95
                   "
                 >
                   <span>{item.name}</span>

@@ -11,9 +11,9 @@ import CalendarDate from "../../components/custom/CalenderDate";
 
 import { ActivityIcon, ChartPie, Zap } from "lucide-react";
 
-import dashboardCrud from "../../api/dashboardCrud";
 import DashboardLoading from "../../components/dashboard/DashboardLoading";
 import { useToast } from "../../components/custom/Toast";
+import dashboardCrud from "../../api/dashboardCrud"
 
 function DashboardContent() {
   const toast = useToast();

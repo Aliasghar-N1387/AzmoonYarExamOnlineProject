@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import bgsidebar from "../../assets/img/sidebar-img.png";
-import bgsidbarDark from "../../assets/img/sidbar-dark.png"
-
+import bgsidbarDark from "../../assets/img/sidbar-dark.png";
+import { useAlert } from "../../components/custom/AlertContext";
+import auth from "../../api/auth";
 
 function SideBarContent({ collapsed, setCollapsed, darkMode }) {
   const menuItemSidebar = [
@@ -77,6 +78,48 @@ function SideBarContent({ collapsed, setCollapsed, darkMode }) {
 
   const location = useLocation();
   const navigate = useNavigate();
+
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  const { alert } = useAlert();
+
+  const handleLogout = () => {
+    alert({
+      type: "confirm",
+      title: "خروج از حساب",
+      message: "آیا مطمئن هستید که می‌خواهید از حساب خود خارج شوید؟",
+      confirmText: "خروج",
+      cancelText: "انصراف",
+      showCancel: true,
+
+      onConfirm: async () => {
+        try {
+          const response = await auth.postRefreshToken(refreshToken);
+
+          if (!response.ok) {
+            throw new Error("Logout failed");
+          }
+
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("accessTokenExpireTime");
+          localStorage.removeItem("refreshTokenExpireTime");
+          localStorage.removeItem("user");
+
+          navigate("/login", { replace: true });
+        } catch (error) {
+          console.error("Logout Error:", error);
+
+          alert({
+            type: "error",
+            title: "خطا در خروج",
+            message: "عملیات خروج انجام نشد. لطفاً دوباره تلاش کنید.",
+            confirmText: "باشه",
+          });
+        }
+      },
+    });
+  };
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -166,6 +209,8 @@ function SideBarContent({ collapsed, setCollapsed, darkMode }) {
 
       <div className="mt-auto">
         <button
+          type="button"
+          onClick={handleLogout}
           className={`flex w-full py-2.5 pt-3 px-2 cursor-pointer rounded-lg transition-all duration-300 hover:bg-rose-500/20 ${
             collapsed ? "justify-center" : "gap-3"
           }`}

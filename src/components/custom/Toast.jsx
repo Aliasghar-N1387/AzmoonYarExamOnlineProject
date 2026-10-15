@@ -1,18 +1,6 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
-import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
-  X,
-} from "lucide-react";
-
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 const ToastContext = createContext(null);
 
@@ -46,7 +34,6 @@ const toastConfig = {
   },
 };
 
-
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
@@ -55,13 +42,7 @@ export function ToastProvider({ children }) {
   }, []);
 
   const showToast = useCallback(
-    ({
-      type = "info",
-      message,
-      title,
-      duration = 4000,
-      action,
-    }) => {
+    ({ type = "info", message, title, duration = 4000, action }) => {
       const id = Date.now() + Math.random();
 
       setToasts((prev) => [
@@ -140,15 +121,12 @@ export function ToastProvider({ children }) {
   );
 }
 
-
 function ToastItem({ toast, onClose }) {
   const config = toastConfig[toast.type] || toastConfig.info;
   const Icon = config.icon;
 
   return (
-    <div
-      className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.12)] backdrop-blur-md animate-[toastIn_0.35s_ease-out]"
-    >
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.12)] backdrop-blur-md animate-[toastIn_0.35s_ease-out]">
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div
@@ -196,16 +174,17 @@ function ToastItem({ toast, onClose }) {
       {/* Progress Bar */}
       {toast.duration > 0 && (
         <div
-          className={`absolute bottom-0 right-0 h-1 ${config.progressClass} animate-[toastProgress_${toast.duration}ms_linear]`}
+          className={`absolute bottom-0 right-0 h-1 ${config.progressClass} animate-toastProgress`}
           style={{
             width: "100%",
+            transformOrigin: "right",
+            animationDuration: `${toast.duration}ms`,
           }}
         />
       )}
     </div>
   );
 }
-
 
 export function useToast() {
   const context = useContext(ToastContext);

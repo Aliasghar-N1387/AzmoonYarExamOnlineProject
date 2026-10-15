@@ -20,4 +20,20 @@ const registerUserSingUp = async (data) => {
   });
 };
 
-export default { getTokenLogin , registerUserSingUp };
+const getAccessToken = () => localStorage.getItem("accessToken");
+
+const postRefreshToken = async (token) => {
+  return fetch(`${API_URL}v1/auth/logout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getAccessToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refreshToken: token,
+    }),
+  });
+};
+
+
+export default { getTokenLogin , registerUserSingUp , postRefreshToken };

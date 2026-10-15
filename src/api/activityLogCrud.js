@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
-const accessToken = localStorage.getItem("accessToken");
+const getAccessToken = () => localStorage.getItem("accessToken");
 
 const getActivityLogs = async ({ search = "", activityType = "" } = {}) => {
   const params = new URLSearchParams();
@@ -12,11 +12,23 @@ const getActivityLogs = async ({ search = "", activityType = "" } = {}) => {
     params.append("EntityType", activityType);
   }
 
-  return await fetch(`${API_URL}v1/activity-log?${params.toString()}`, {
+  const token = getAccessToken();
+
+  console.log("========== ACTIVITY LOG ==========");
+  console.log("Token:", token);
+  console.log("Token exists:", !!token);
+  console.log("Token length:", token?.length);
+  console.log("Authorization:", token ? `Bearer ${token}` : "NO TOKEN");
+
+  const url = `${API_URL}v1/activity-log?${params.toString()}`;
+
+  console.log("URL:", url);
+
+  return fetch(url, {
     method: "GET",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
 };
