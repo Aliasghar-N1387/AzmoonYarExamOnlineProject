@@ -118,7 +118,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-8 gap-6 flex justify-between">
         <div>
           <LatestActivities Cardinfo={data} />
         </div>

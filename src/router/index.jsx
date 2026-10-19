@@ -11,6 +11,7 @@ import ExamContent from "../views/exams/ExamContent";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import PublicRoute from "../components/auth/PublicRoute";
+import MessagesPage from "../components/header/MessagesPage";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
           {
             path: "questions",
             element: <QuestionContent />,
+          },
+          {
+            path: "messages",
+            element: <MessagesPage />,
           },
         ],
       },

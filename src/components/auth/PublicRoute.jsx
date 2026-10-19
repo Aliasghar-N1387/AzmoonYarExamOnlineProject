@@ -4,7 +4,6 @@ const PublicRoute = () => {
   const accessToken = localStorage.getItem("accessToken");
   const expireTime = localStorage.getItem("accessTokenExpireTime");
 
-  // هیچ توکنی وجود ندارد
   if (!accessToken || !expireTime) {
     return <Outlet />;
   }
@@ -12,9 +11,9 @@ const PublicRoute = () => {
   // بررسی تاریخ انقضا
   const expireAt = new Date(expireTime).getTime();
 
-  // تاریخ انقضا خراب است
   if (Number.isNaN(expireAt)) {
     return <Outlet />;
+    
   }
 
   // اگر توکن هنوز معتبر است

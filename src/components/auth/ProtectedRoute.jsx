@@ -1,5 +1,6 @@
-import { useEffect } from "react";
-import { Navigate, Outlet, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { Navigate, Outlet } from "react-router";
+import auth from "../../api/auth";
 
 const clearAuth = () => {
   localStorage.removeItem("accessToken");
@@ -10,62 +11,135 @@ const clearAuth = () => {
 };
 
 const ProtectedRoute = () => {
-  const navigate = useNavigate();
-
-  const accessToken = localStorage.getItem("accessToken");
-  const expireTime = localStorage.getItem("accessTokenExpireTime");
+  const [checking, setChecking] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [sessionVersion, setSessionVersion] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
+    let timer;
+
+    const refreshAccessToken = async () => {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        clearAuth();
+
+        if (!cancelled) {
+          setAuthenticated(false);
+          setChecking(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await auth.postRefreshTokenForExpierd(refreshToken);
+
+        const result = await response.json().catch(() => null);
+
+        if (
+          !response.ok ||
+          result?.success !== true ||
+          !result?.data?.accessToken ||
+          !result?.data?.refreshToken
+        ) {
+          throw new Error("Refresh token is invalid or expired");
+        }
+
+        const {
+          accessToken,
+          refreshToken: newRefreshToken,
+          accessTokenExpireTime,
+          refreshTokenExpireTime,
+          user,
+        } = result.data;
+
+        // توکن‌های جدید را ذخیره کن
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", newRefreshToken);
+
+        if (accessTokenExpireTime) {
+          localStorage.setItem("accessTokenExpireTime", accessTokenExpireTime);
+        }
+
+        if (refreshTokenExpireTime) {
+          localStorage.setItem(
+            "refreshTokenExpireTime",
+            refreshTokenExpireTime,
+          );
+        }
+
+        if (user) {
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+
+        if (!cancelled) {
+          setAuthenticated(true);
+          setChecking(false);
+          setSessionVersion((version) => version + 1);
+        }
+      } catch (error) {
+        console.error("Refresh token error:", error);
+
+        clearAuth();
+
+        if (!cancelled) {
+          setAuthenticated(false);
+          setChecking(false);
+        }
+      }
+    };
+
+    const accessToken = localStorage.getItem("accessToken");
+    const expireTime = localStorage.getItem("accessTokenExpireTime");
+
     if (!accessToken || !expireTime) {
+      clearAuth();
+      setAuthenticated(false);
+      setChecking(false);
       return;
     }
 
     const expireAt = new Date(expireTime).getTime();
 
     if (Number.isNaN(expireAt)) {
-      console.error("Invalid accessTokenExpireTime:", expireTime);
-
       clearAuth();
-      navigate("/login", { replace: true });
+      setAuthenticated(false);
+      setChecking(false);
       return;
     }
 
-    const remainingTime = expireAt - Date.now();
+    setChecking(true);
 
-    console.log("Token expires at:", new Date(expireAt));
-    console.log("Remaining time:", remainingTime);
+    // یک دقیقه قبل از انقضا تمدید کن
+    const refreshIn = expireAt - Date.now() - 60_000;
 
-    if (remainingTime <= 0) {
-      clearAuth();
-      navigate("/login", { replace: true });
-      return;
+    if (refreshIn <= 0) {
+      refreshAccessToken();
+    } else {
+      setAuthenticated(true);
+      setChecking(false);
+
+      timer = setTimeout(() => {
+        refreshAccessToken();
+      }, refreshIn);
     }
-
-    const timer = setTimeout(() => {
-      clearAuth();
-      navigate("/login", { replace: true });
-    }, remainingTime);
 
     return () => {
+      cancelled = true;
       clearTimeout(timer);
     };
-  }, [accessToken, expireTime, navigate]);
+  }, [sessionVersion]);
 
-  // توکن وجود ندارد
-  if (!accessToken || !expireTime) {
-    return <Navigate to="/login" replace />;
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        در حال بررسی و تمدید نشست...
+      </div>
+    );
   }
 
-  const expireAt = new Date(expireTime).getTime();
-
-  // تاریخ انقضا نامعتبر است
-  if (Number.isNaN(expireAt)) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // توکن منقضی شده
-  if (Date.now() >= expireAt) {
-    clearAuth();
+  if (!authenticated) {
     return <Navigate to="/login" replace />;
   }
 

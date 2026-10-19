@@ -74,6 +74,7 @@ function SideBarContent({ collapsed, setCollapsed, darkMode }) {
       iconMenu: <CircleQuestionMark size={16} />,
       router: "create-exam",
     },
+    
   ];
 
   const location = useLocation();

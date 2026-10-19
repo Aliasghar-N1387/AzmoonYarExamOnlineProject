@@ -55,7 +55,7 @@ function ExamContent() {
   ];
 
   return (
-    <div className="p-6 h-full pb-0 bg-violet-50/50">
+    <div className="p-6 h-full pb-0 bg-violet-50/50 dark:bg-slate-950">
       {/* Header  */}
       <div className="flex pl-10 justify-between text-right">
         <div className="flex gap-4">

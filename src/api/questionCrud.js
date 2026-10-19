@@ -2,10 +2,39 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const getAccessToken = () => localStorage.getItem("accessToken");
 
-const getQuestions = async (pageNumber = 1, pageSize = 10) => {
-  const params = new URLSearchParams({
-    pageNumber: String(pageNumber),
-    pageSize: String(pageSize),
+const getQuestions = async (pageNumber = 1, pageSize = 8, filters = {}) => {
+  const params = new URLSearchParams();
+
+  params.set("PageNumber", String(pageNumber));
+  params.set("PageSize", String(pageSize));
+
+  const filterMap = {
+    search: "SearchPhase",
+    difficultyLevel: "DifficultyLevel",
+    grade: "Grade",
+    questionType: "QuestionType",
+    questionStatus: "QuestionStatus",
+  };
+
+  Object.entries(filterMap).forEach(([key, paramName]) => {
+    let value = filters[key];
+
+    // پشتیبانی از مقادیر دریافتی از Dropdown
+    if (value && typeof value === "object") {
+      value = value.id;
+    }
+
+    // مقادیر خالی یا انتخاب‌نشده را ارسال نکن
+    if (
+      value === null ||
+      value === undefined ||
+      value === "" ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
+      return;
+    }
+
+    params.set(paramName, String(value).trim());
   });
 
   return fetch(`${API_URL}v1/question?${params.toString()}`, {
@@ -58,8 +87,6 @@ const createQuestion = async (data) => {
     difficultyLevel: Number(data.difficultyLevel?.id ?? data.difficultyLevel),
     questionType: Number(data.questionType),
   };
-
-  console.log("📤 createQuestion payload:", payload);
 
   return fetch(`${API_URL}v1/question`, {
     method: "POST",

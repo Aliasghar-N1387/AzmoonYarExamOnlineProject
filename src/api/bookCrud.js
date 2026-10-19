@@ -2,11 +2,15 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const getAccessToken = () => localStorage.getItem("accessToken");
 
-const getBooks = async (pageNumber = 1, pageSize = 8) => {
+const getBooks = async (pageNumber = 1, pageSize = 8, searchPhase = "") => {
   const params = new URLSearchParams({
     pageNumber: String(pageNumber),
     pageSize: String(pageSize),
   });
+
+  if (searchPhase.trim()) {
+    params.append("SearchPhase", searchPhase.trim());
+  }
 
   return await fetch(`${API_URL}v1/book?${params.toString()}`, {
     method: "GET",
@@ -61,5 +65,6 @@ export default {
   getBooks,
   createBook,
   getDetail,
-  deleteBook,updateBook
+  deleteBook,
+  updateBook,
 };

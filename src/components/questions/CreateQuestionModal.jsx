@@ -1127,6 +1127,27 @@ function CreateQuestionModal({ onClose, onSave }) {
                 </p>
               </div>
             </div>
+            {/* کادر متن سؤال برای تمام انواع به‌جز جای خالی */}
+            {activeType !== 2 && (
+              <div className="space-y-2">
+                <label htmlFor="regular-question-text" className={labelClass}>
+                  متن سؤال
+                </label>
+
+                <textarea
+                  id="regular-question-text"
+                  value={questionText}
+                  onChange={(e) => {
+                    setQuestionText(e.target.value);
+                    setError("");
+                  }}
+                  placeholder={`متن سؤال ${selectedType.name} را وارد کنید...`}
+                  rows={4}
+                  className={textareaClass}
+                />
+              </div>
+            )}
+            
             {activeType === 2 && (
               <div>
                 <div className="space-y-3">
@@ -1314,7 +1335,6 @@ function CreateQuestionModal({ onClose, onSave }) {
                 </p>
               </div>
             )}
-
             {/* وصل کردنی */}
             {activeType === 3 && (
               <div className="space-y-3">
@@ -1364,7 +1384,6 @@ function CreateQuestionModal({ onClose, onSave }) {
                 </button>
               </div>
             )}
-
             {/* تستی */}
             {activeType === 4 && (
               <div className="space-y-4">
@@ -1476,7 +1495,6 @@ function CreateQuestionModal({ onClose, onSave }) {
                 </div>
               </div>
             )}
-
             {/* صحیح / غلط */}
             {activeType === 6 && (
               <div>

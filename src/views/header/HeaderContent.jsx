@@ -3,8 +3,11 @@ import { flushSync } from "react-dom";
 import SearchHeader from "../../components/header/SearchHeader";
 import { Bell, MessageCircleMore, Moon, Sun } from "lucide-react";
 import UserProfileHeader from "../../components/header/UserProfileHeader";
+import { useNavigate } from "react-router";
 
 function HeaderContent() {
+  const navigate = useNavigate();
+
   const [user] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -70,34 +73,81 @@ function HeaderContent() {
     },
   ];
 
+  const headerActions = [
+    {
+      id: "notifications",
+      icon: Bell,
+      label: "اعلان‌های خوانده‌نشده",
+      count: 3,
+      onClick: undefined,
+    },
+    {
+      id: "messages",
+      icon: MessageCircleMore,
+      label: "پیام‌های خوانده‌نشده",
+      count: 2,
+      onClick: () => navigate("/dashboard/messages"),
+    },
+    {
+      id: "theme",
+      icon: darkMode ? Sun : Moon,
+      label: darkMode ? "فعال کردن حالت روشن" : "فعال کردن حالت تاریک",
+      onClick: toggleDarkMode,
+    },
+  ];
+
   return (
     <div className="border-b border-gray-300 dark:border-slate-800 bg-violet-50/50 dark:bg-slate-950 py-4 px-8 flex items-center justify-end transition-colors duration-300">
-      <div className="mr-20">
+      <div className="mr-12">
         <UserProfileHeader />
       </div>
 
-      <div className="flex items-center gap-6">
-        {visitMoreWebIcon.map((visit) => {
-          const Icon = visit.icon;
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {headerActions.map((action) => {
+          const Icon = action.icon;
+          const hasUnread = action.count > 0;
 
           return (
             <button
-              key={visit.id}
+              key={action.id}
               type="button"
-              onClick={visit.onClick}
+              onClick={action.onClick}
               aria-label={
-                visit.id === 3
-                  ? darkMode
-                    ? "فعال کردن حالت روشن"
-                    : "فعال کردن حالت تاریک"
-                  : undefined
+                hasUnread
+                  ? `${action.label}، ${action.count} مورد`
+                  : action.label
               }
-              className="rounded-full transition-all duration-200 hover:bg-violet-100 dark:hover:bg-slate-800"
+              title={action.label}
+              className="group relative flex size-11 items-center justify-center
+        rounded-2xl border border-slate-200/80 bg-white
+        text-slate-600 shadow-sm transition-all duration-300
+        hover:-translate-y-0.5 hover:border-violet-200
+        hover:bg-violet-50 hover:text-violet-600 hover:shadow-md
+        dark:border-slate-700 dark:bg-slate-900
+        dark:text-slate-300 dark:hover:border-violet-500/40
+        dark:hover:bg-violet-500/10 dark:hover:text-violet-300"
             >
               <Icon
-                size={32}
-                className="p-2 cursor-pointer text-gray-700 dark:text-gray-200"
+                size={20}
+                strokeWidth={1.8}
+                className={`transition-transform duration-300 ${
+                  action.id === "theme"
+                    ? "group-hover:rotate-12"
+                    : "group-hover:scale-110"
+                }`}
               />
+
+              {hasUnread && (
+                <span
+                  className="absolute -right-1 -top-1 flex min-w-6 h-6
+            items-center justify-center rounded-full border-2
+            border-white bg-rose-500 px-1 text-[10px]
+            font-extrabold leading-none text-white
+            shadow-sm dark:border-slate-950"
+                >
+                  {action.count > 9 ? "9+" : action.count}
+                </span>
+              )}
             </button>
           );
         })}

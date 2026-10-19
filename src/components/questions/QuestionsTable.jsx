@@ -5,7 +5,6 @@ import { useAlert } from "../custom/AlertContext";
 import questionCrud from "../../api/questionCrud";
 
 const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
-
   const toast = useToast();
   const { alert } = useAlert();
 
@@ -47,6 +46,24 @@ const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
       "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
     "وصل کردنی":
       "bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300",
+  };
+
+  const statusStyles = {
+    تکمیل‌شده: {
+      dot: "bg-emerald-500",
+      text: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    },
+    "در حال تکمیل": {
+      dot: "bg-orange-500",
+      text: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-50 dark:bg-orange-950/30",
+    },
+    نامشخص: {
+      dot: "bg-slate-400",
+      text: "text-slate-600 dark:text-slate-400",
+      bg: "bg-slate-100 dark:bg-slate-800",
+    },
   };
 
   const typeNames = {
@@ -255,12 +272,13 @@ const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
       </div>
 
       <div className="w-full max-h-90 overflow-x-auto overflow-y-auto question-scroll">
-        <table className="w-full min-w-150 border-collapse text-sm">
+        <table className="w-full min-w-200 border-collapse text-sm">
           <thead className="sticky top-0 z-20 bg-violet-50 backdrop-blur-md dark:bg-slate-800/95">
             <tr className="h-12 border-b border-violet-100 text-slate-600 dark:border-slate-700 dark:text-slate-300">
               <th className="w-[32%] px-5 text-right text-xs font-bold">
                 عنوان سوال
               </th>
+              <th className="w-[12%] text-center text-xs font-bold">وضعیت</th>
               <th className="w-[15%] text-center text-xs font-bold">کد کتاب</th>
               <th className="w-[12%] text-center text-xs font-bold">سختی</th>
               <th className="w-[12%] text-center text-xs font-bold">
@@ -269,7 +287,6 @@ const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
               <th className="w-[8%] text-center text-xs font-bold">عملیات</th>
             </tr>
           </thead>
-
           <tbody>
             {questions.length === 0 ? (
               <tr>
@@ -305,6 +322,9 @@ const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
                   difficultyStyles.orange;
                 const questionStatus = getQuestionStatus(question);
                 const questionDate = formatQuestionDate(question);
+
+                const status =
+                  statusStyles[questionStatus] ?? statusStyles["نامشخص"];
                 return (
                   <tr
                     key={questionId}
@@ -347,6 +367,19 @@ const QuestionTable = ({ questions = [], onDelete, loading = false }) => {
                             <div className="absolute -top-1.5 right-6 h-3 w-3 rotate-45 border-l border-t border-violet-100 bg-white dark:border-slate-700 dark:bg-slate-800" />
                           </div>
                         </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 text-center">
+                      <div className="flex items-center justify-center">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] w-30 justify-center font-semibold ${status.bg} ${status.text}`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${status.dot}`}
+                          />
+                          {questionStatus}
+                        </span>
                       </div>
                     </td>
 

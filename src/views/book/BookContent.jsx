@@ -9,6 +9,8 @@ import {
   CalendarDays,
   ChevronDown,
   FileText,
+  Search,
+  RotateCcw,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -21,10 +23,13 @@ import DropDown from "../../components/custom/DropDown";
 import bookCrud from "../../api/bookCrud";
 import { useToast } from "../../components/custom/Toast";
 import { useAlert } from "../../components/custom/AlertContext";
+import { useLocation, useNavigate } from "react-router";
 
 function BookContent() {
   const toast = useToast();
   const { alert } = useAlert();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -55,6 +60,14 @@ function BookContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  const [searchPhase, setSearchPhase] = useState("");
+
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedStage, setSelectedStage] = useState(null);
+  const [selectedGradeFilter, setSelectedGradeFilter] = useState(null);
+
+  const [selectedBookSource, setSelectedBookSource] = useState(null);
+
   const gradeItems = [
     { id: 1, name: "اول ابتدایی" },
     { id: 2, name: "دوم ابتدایی" },
@@ -68,18 +81,6 @@ function BookContent() {
     { id: 10, name: "دهم" },
     { id: 11, name: "یازدهم" },
     { id: 12, name: "دوازدهم" },
-  ];
-
-  const fieldItems = [
-    { id: 1, name: "همه رشته‌ها" },
-    { id: 2, name: "ریاضی فیزیک" },
-    { id: 3, name: "علوم تجربی" },
-    { id: 4, name: "علوم انسانی" },
-  ];
-
-  const levelItems = [
-    { id: 1, name: "متوسطه اول" },
-    { id: 2, name: "متوسطه دوم" },
   ];
 
   const yearItems = [
@@ -184,9 +185,9 @@ function BookContent() {
     setPreviewImage(URL.createObjectURL(file));
   };
 
-  const getBooks = async (page = 1) => {
+  const getBooks = async (page = 1, search = searchPhase) => {
     try {
-      const response = await bookCrud.getBooks(page, pageSize);
+      const response = await bookCrud.getBooks(page, pageSize, search);
 
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
@@ -203,6 +204,7 @@ function BookContent() {
       console.error("Error fetching books:", error);
 
       setBooks([]);
+      setCurrentPage(1);
       setTotalPages(1);
       setTotalCount(0);
 
@@ -215,7 +217,30 @@ function BookContent() {
 
   useEffect(() => {
     getBooks(1);
+
+    if (location.state?.openCreateBookModal) {
+      resetBookForm();
+      setIsModalOpen(true);
+
+      // پاک کردن state تا با بازگشت به صفحه، مودال دوباره باز نشود
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      getBooks(1, searchPhase);
+    }, 400);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchPhase]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStatus, selectedStage, selectedGradeFilter, selectedBookSource]);
 
   const handleSaveBook = async () => {
     if (!bookName.trim()) {
@@ -238,7 +263,7 @@ function BookContent() {
 
       formData.append("BookName", bookName.trim());
       formData.append("Grade", String(selectedGrade.id));
-      formData.append("BookDescription",description.trim());
+      formData.append("BookDescription", description.trim());
 
       if (bookImage) {
         formData.append("Picture", bookImage);
@@ -516,6 +541,64 @@ function BookContent() {
     },
   ];
 
+  const filteredBooks = books.filter((book) => {
+    // فیلتر پایه تحصیلی
+    if (selectedGradeFilter && Number(book.grade) !== selectedGradeFilter.id) {
+      return false;
+    }
+
+    // فیلتر وضعیت
+    if (selectedStatus) {
+      const isActive =
+        book.status === "active" || book.status === 1 || book.status === true;
+
+      if (selectedStatus.id === 1 && !isActive) {
+        return false;
+      }
+
+      if (selectedStatus.id === 2 && isActive) {
+        return false;
+      }
+    }
+
+    // فیلتر مقطع تحصیلی
+    if (selectedStage) {
+      const grade = Number(book.grade);
+
+      const stage =
+        grade >= 1 && grade <= 6
+          ? 1
+          : grade >= 7 && grade <= 9
+            ? 2
+            : grade >= 10 && grade <= 12
+              ? 3
+              : 4;
+
+      if (stage !== selectedStage.id) {
+        return false;
+      }
+    }
+
+    // فیلتر منبع کتاب
+    if (
+      selectedBookSource &&
+      Number(book.bookSource) !== selectedBookSource.id
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const clearBookFilters = () => {
+    setSearchPhase("");
+    setSelectedStatus(null);
+    setSelectedStage(null);
+    setSelectedGradeFilter(null);
+    setCurrentPage(1);
+    getBooks(1, "");
+  };
+
   return (
     <div className="p-6 h-full bg-violet-50/50 dark:bg-slate-950">
       <div className="flex pl-10 justify-between text-right">
@@ -548,45 +631,117 @@ function BookContent() {
         </div>
       </div>
 
-      <div className="my-10 flex justify-center items-end gap-14">
-        <FiltersBooks />
-        <SearchBooks />
+      <div className="my-10 flex justify-centers items-end gap-5s">
+        <FiltersBooks
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+          selectedBookSource={selectedBookSource}
+          setSelectedBookSource={setSelectedBookSource}
+          selectedGrade={selectedGradeFilter}
+          setSelectedGrade={setSelectedGradeFilter}
+        />
+        <SearchBooks value={searchPhase} onChange={setSearchPhase} />
       </div>
 
-      <div className="latest-scroll px-10 cursor-s-resize mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-h-120 overflow-auto">
-        {books.map((book) => (
-          <div key={book.id}>
-            <Book
-              title={book.bookName}
-              grade={`پایه ${gradeBooks[book.grade] || book.grade}`}
-              field={book.bookSource === 1 ? "کتاب درسی" : "سایر منابع"}
-              level=""
-              image={book.picture}
-              lessons={book.lessons?.length || 0}
-              questions={0}
-              onOpenModal={() => setIsModalOpen(true)}
-              onDetails={() => handleBookDetails(book.id)}
-              onDelete={() => handleDeleteBook(book.id)}
-              bookSource={book.bookSource}
-              onEdit={() => handleEditBook(book)}
-            />
+      <div className="latest-scroll mt-5 h-120 overflow-auto px-10">
+        {filteredBooks.length > 0 ? (
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredBooks.map((book) => (
+              <div key={book.id}>
+                <Book
+                  title={book.bookName}
+                  grade={`پایه ${gradeBooks[book.grade] || book.grade}`}
+                  field={book.bookSource === 1 ? "کتاب درسی" : "سایر منابع"}
+                  level=""
+                  image={book.picture}
+                  lessons={book.lessons?.length || 0}
+                  questions={0}
+                  onOpenModal={() => setIsModalOpen(true)}
+                  onDetails={() => handleBookDetails(book.id)}
+                  onDelete={() => handleDeleteBook(book.id)}
+                  bookSource={book.bookSource}
+                  onEdit={() => handleEditBook(book)}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="flex w-full items-center justify-center p-4">
+            <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-violet-100 bg-linear-to-br from-white via-violet-50/80 to-indigo-50/80 px-6 py-12 text-center shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/40 sm:px-12">
+              {/* افکت‌های پس‌زمینه */}
+              <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-violet-400/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 -left-12 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl" />
+
+              <div className="relative flex flex-col items-center">
+                {/* آیکون */}
+                <div className="relative mb-7 flex h-24 w-24 items-center justify-center rounded-[28px] bg-linear-to-br from-violet-600 to-indigo-600 text-white shadow-xl shadow-violet-500/20">
+                  <BookOpen size={42} strokeWidth={1.7} />
+
+                  <div className="absolute -right-3 -top-3 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-white text-violet-600 shadow-md dark:border-slate-900 dark:bg-slate-800 dark:text-violet-400">
+                    <Search />
+                  </div>
+                </div>
+
+                {/* عنوان و توضیحات */}
+                <span className="mb-3 rounded-full border border-violet-100 bg-white/80 px-3 py-1 text-xs font-bold text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300">
+                  نتیجه‌ای یافت نشد
+                </span>
+
+                <h3 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white">
+                  کتابی پیدا نشد
+                </h3>
+
+                <p className="mt-3 max-w-sm text-sm leading-7 text-slate-500 dark:text-slate-400">
+                  {searchPhase.trim() ||
+                  selectedStatus ||
+                  selectedStage ||
+                  selectedGradeFilter
+                    ? "کتابی مطابق جستجو یا فیلترهای انتخاب‌شده پیدا نکردیم. می‌توانید معیارهای خود را تغییر دهید."
+                    : "هنوز کتابی ثبت نشده است. اولین کتاب خود را به مجموعه آموزشی اضافه کنید."}
+                </p>
+
+                {/* دکمه‌ها */}
+                <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+                  {(searchPhase.trim() ||
+                    selectedStatus ||
+                    selectedStage ||
+                    selectedGradeFilter) && (
+                    <button
+                      type="button"
+                      onClick={clearBookFilters}
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-violet-600 px-6 text-sm font-bold text-white shadow-lg shadow-violet-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-xl active:translate-y-0"
+                    >
+                      <RotateCcw size={17} />
+                      پاک کردن فیلترها
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetBookForm();
+                      setIsModalOpen(true);
+                    }}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 transition hover:border-violet-200 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                  >
+                    <Plus size={18} />
+                    افزودن کتاب جدید
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div
         dir="rtl"
         className="mt-6 flex flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-12"
       >
-        <p className="text-sm text-gray-500 dark:text-white">
-          تعداد کل کتاب‌ها :
-          <span className="font-bold text-violet-700">{totalCount}</span>
-        </p>
-
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => getQuestions(currentPage - 1)}
+            onClick={() => getBooks(currentPage - 1)}
             disabled={currentPage <= 1}
             className="rounded-lg border bg-white px-3 py-2 text-sm
         text-gray-700 disabled:cursor-not-allowed disabled:opacity-50
@@ -601,7 +756,7 @@ function BookContent() {
                 type="button"
                 key={page}
                 onClick={() => getBooks(page)}
-                className={`h-8 w-8 rounded-lg text-sm ${
+                className={`h-9 min-w-9 rounded-lg px-3 text-sm ${
                   currentPage === page
                     ? "bg-violet-700 text-white dark:bg-violet-900 dark:ring-1 dark:ring-white"
                     : "border bg-white text-gray-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -623,6 +778,10 @@ function BookContent() {
             بعدی
           </button>
         </div>
+        <p className="text-sm text-gray-500 dark:text-white">
+          تعداد کل کتاب‌ها :
+          <span className="font-bold text-violet-700">{totalCount}</span>
+        </p>
       </div>
 
       {isModalOpen && (

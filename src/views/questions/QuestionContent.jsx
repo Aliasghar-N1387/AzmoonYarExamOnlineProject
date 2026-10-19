@@ -22,10 +22,14 @@ import CreateQuestionModal from "../../components/questions/CreateQuestionModal"
 import questionCrud from "../../api/questionCrud";
 import { useToast } from "../../components/custom/Toast";
 import { useAlert } from "../../components/custom/AlertContext";
+import { useLocation, useNavigate } from "react-router";
 
 function QuestionContent() {
   const toast = useToast();
   const { alert } = useAlert();
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsCreateModalOpen] = useState(false);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
@@ -39,6 +43,15 @@ function QuestionContent() {
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+
+  const [search, setSearch] = useState("");
+
+ const [filters, setFilters] = useState({
+  difficultyLevel: null,
+  questionStatus: null,
+  grade: null,
+  questionType: null,
+});
 
   const BtnHeader = [
     {
@@ -62,11 +75,19 @@ function QuestionContent() {
     localStorage.getItem("darkMode") === "true",
   );
 
-  const getQuestions = async (page = 1) => {
+  const getQuestions = async (
+    page = 1,
+    activeFilters = filters,
+    activeSearch = search,
+  ) => {
     try {
       setLoadingQuestions(true);
 
-      const response = await questionCrud.getQuestions(page, pageSize);
+      const response = await questionCrud.getQuestions(page, pageSize, {
+        ...activeFilters,
+        search: activeSearch,
+      });
+
       const result = await response.json();
 
       if (!response.ok || result?.success === false) {
@@ -122,7 +143,32 @@ function QuestionContent() {
 
   useEffect(() => {
     getQuestions(1);
+
+    if (location.state?.openCreateQuestionModal) {
+      setIsCreateModalOpen(true);
+
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      getQuestions(1, filters, search);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search, filters]);
+
+  const handleFilterChange = (key, selected) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: selected ?? null,
+    }));
+  };
 
   return (
     <div className="p-6 h-full pb-0 bg-violet-50/50 dark:bg-slate-950 transition-colors duration-300">
@@ -164,10 +210,12 @@ function QuestionContent() {
         </div>
       </div>
       {/* Filter & Search */}
-      <div className="my-10 flex justify-center items-end gap-14">
-        <FilterQuestion />
-        <SearchQuestion />
+
+      <div className="my-10 flex justify-center items-end gap-5">
+        <FilterQuestion value={filters} onChange={handleFilterChange} />
+        <SearchQuestion value={search} onChange={setSearch} />
       </div>
+
       {/* Questions Info */}
       <div>
         <CardinfoQuestions

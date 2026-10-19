@@ -20,14 +20,13 @@ const registerUserSingUp = async (data) => {
   });
 };
 
-const getAccessToken = () => localStorage.getItem("accessToken");
-
-const postRefreshToken = async (token) => {
-  return fetch(`${API_URL}v1/auth/logout`, {
+// تمدید توکن
+const postRefreshTokenForExpierd = async (token) => {
+  return fetch(`${API_URL}v1/auth/refresh`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${getAccessToken()}`,
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify({
       refreshToken: token,
@@ -35,5 +34,23 @@ const postRefreshToken = async (token) => {
   });
 };
 
+// خروج از حساب
+const postRefreshToken = async (token) => {
+  return fetch(`${API_URL}v1/auth/logout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+    body: JSON.stringify({
+      refreshToken: token,
+    }),
+  });
+};
 
-export default { getTokenLogin , registerUserSingUp , postRefreshToken };
+export default {
+  getTokenLogin,
+  registerUserSingUp,
+  postRefreshToken,
+  postRefreshTokenForExpierd,
+};

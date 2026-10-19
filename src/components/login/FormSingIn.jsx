@@ -38,73 +38,6 @@ function FormSingIn({ title, subtitle, onSingUp }) {
     },
   ];
 
-  // const handleLogin = async () => {
-  //
-  //
-  //     if (response.status === 200) {
-  //       // if (result?.token) {
-  //       //   localStorage.setItem("token", result.token);
-  //       // }
-
-  //       // if (result?.accessToken) {
-  //       //   localStorage.setItem("accessToken", result.accessToken);
-  //       // }
-  //       console.log("ورود موفق");
-  //       localStorage.setItem(
-  //         "user",
-  //         JSON.stringify({
-  //           firstName: result?.data?.firstName || result?.firstName || "",
-  //           lastName: result?.data?.lastName || result?.lastName || "",
-  //         }),
-  //       );
-  //       toast.success("ورود با موفقیت انجام شد", {
-  //         title: "خوش آمدید 🎉",
-  //         duration: 1500,
-  //       });
-
-  //       // رفتن به داشبورد
-  //       setTimeout(() => {
-  //         navigate("/dashboard");
-  //       }, 1500);
-
-  //       return;
-  //     }
-  //     if (result?.error) {
-  //       const errors = Object.values(result.error).flat();
-
-  //       errors.forEach((errorMessage) => {
-  //         toast.error(errorMessage, {
-  //           title: "خطای ورود",
-  //           duration: 6000,
-  //         });
-  //       });
-
-  //       return;
-  //     }
-  //     if (result?.message) {
-  //       toast.error(result.message, {
-  //         title: "ورود ناموفق",
-  //         duration: 6000,
-  //       });
-
-  //       return;
-  //     }
-  //     toast.error("شماره موبایل یا رمز عبور صحیح نیست", {
-  //       title: "ورود ناموفق",
-  //       duration: 6000,
-  //     });
-  //   } catch (error) {
-  //     console.error("Login Error:", error);
-
-  //     toast.error(error.message || "خطایی هنگام ورود رخ داد", {
-  //       title: "خطای ورود",
-  //       duration: 6000,
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const setToken = async () => {
     if (loading) return;
 
@@ -214,7 +147,6 @@ function FormSingIn({ title, subtitle, onSingUp }) {
       try {
         setLoading(true);
 
-        // ارسال توکن گوگل به بک‌اند
         const response = await loginCrud.loginWithGoogle({
           idtoken: tokenResponse.access_token,
         });
