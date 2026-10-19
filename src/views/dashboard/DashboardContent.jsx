@@ -72,8 +72,8 @@ function DashboardContent() {
       <div className="mt-8 flex gap-10 justify-center items-center">
         {/* Rapid Card */}
         <div
-          className="relative px-15 py-3 rounded-lg border border-gray-300 text-right w-full dark:border-slate-700 bg-white
-           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+          className="relative px-15 py-1.25 rounded-xl border border-gray-200 text-right w-full dark:border-slate-700 bg-white
+           dark:bg-slate-900 shadow-sm dark:shadow-black/30"
         >
           <p className="flex justify-end gap-3 text-sm font-bold my-2.5 dark:text-white">
             عملیات سریع
@@ -87,8 +87,8 @@ function DashboardContent() {
 
         {/* Linear Chart */}
         <div
-          className="relative rounded-lg border border-gray-300  dark:border-slate-700 bg-white
-           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+          className="relative rounded-xl border border-gray-200 dark:border-slate-700 bg-white
+           dark:bg-slate-900 shadow-sm dark:shadow-black/30"
         >
           <div className="absolute top-2 right-10 flex justify-between">
             <p className="flex items-center gap-3 text-sm font-bold mt-2.5 dark:text-white">
@@ -104,8 +104,8 @@ function DashboardContent() {
 
         {/* Donut Chart */}
         <div
-          className="relative rounded-lg border border-gray-300  dark:border-slate-700 bg-white
-           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+          className="relative rounded-xl border border-gray-200 shadow-sm  dark:border-slate-700 bg-white
+           dark:bg-slate-900 dark:shadow-black/30"
         >
           <p className="absolute top-2 right-10 flex items-center gap-3 text-sm font-bold mt-2.5 dark:text-white">
             سوالات براساس نوع
@@ -118,7 +118,7 @@ function DashboardContent() {
         </div>
       </div>
 
-      <div className="mt-8 flex gap-17.5 justify-center items-center">
+      <div className="mt-8 flex justify-between">
         <div>
           <LatestActivities Cardinfo={data} />
         </div>

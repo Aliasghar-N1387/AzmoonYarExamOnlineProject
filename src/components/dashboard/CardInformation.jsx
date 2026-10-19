@@ -7,9 +7,7 @@ import {
 import React, { useEffect, useState } from "react";
 import background from "../../assets/img/bg-card-question.png";
 
-
 function CardInformation({ Cardinfo, darkMode }) {
-  
   const cards = [
     {
       id: 1,
@@ -79,17 +77,27 @@ function CardInformation({ Cardinfo, darkMode }) {
       {cards.map((card, index) => (
         <div
           key={card.id}
-          className="flex w-fulls rounded-xl border border-gray-300 dark:border-slate-700 bg-white
-           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30 bg-cover bg-center bg-no-repeat transition-all duration-300"
-          style={{
-            backgroundImage: darkMode ? "none" : `url(${background})`,
-          }}
+          className="relative flex w-full rounded-xl overflow-hidden
+          border border-gray-300 dark:border-slate-700
+          bg-white dark:bg-slate-900
+          shadow-md shadow-gray-800/10 dark:shadow-black/30
+          transition-colors duration-300"
         >
-          <div className="flex items-center justify-center pl-5">
+          {/* عکس فقط در حالت روشن */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat dark:hidden"
+            style={{
+              backgroundImage: `url(${background})`,
+            }}
+          />
+
+          {/* آیکون */}
+          <div className="relative z-10 flex items-center justify-center pl-5">
             <span>{card.icon}</span>
           </div>
 
-          <div className="w-full pr-5 py-3 px-15">
+          {/* اطلاعات کارت */}
+          <div className="relative z-10 w-full pr-5 py-3 px-15">
             <p className="font-bold text-lg text-gray-800 dark:text-slate-100 transition-colors duration-300">
               {card.name}
             </p>

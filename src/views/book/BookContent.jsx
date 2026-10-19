@@ -160,10 +160,11 @@ function BookContent() {
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.warning("لطفاً یک فایل تصویری انتخاب کنید", {
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      toast.warning("لطفاً یک تصویر PNG، JPG یا WEBP انتخاب کنید", {
         title: "فرمت نامعتبر",
       });
+      e.target.value = "";
       return;
     }
 
@@ -171,6 +172,7 @@ function BookContent() {
       toast.warning("حجم تصویر نباید بیشتر از 5 مگابایت باشد", {
         title: "حجم فایل زیاد است",
       });
+      e.target.value = "";
       return;
     }
 
@@ -178,10 +180,8 @@ function BookContent() {
       URL.revokeObjectURL(previewImage);
     }
 
-    const imageUrl = URL.createObjectURL(file);
-
     setBookImage(file);
-    setPreviewImage(imageUrl);
+    setPreviewImage(URL.createObjectURL(file));
   };
 
   const getBooks = async (page = 1) => {
@@ -238,6 +238,7 @@ function BookContent() {
 
       formData.append("BookName", bookName.trim());
       formData.append("Grade", String(selectedGrade.id));
+      formData.append("BookDescription",description.trim());
 
       if (bookImage) {
         formData.append("Picture", bookImage);
@@ -350,6 +351,15 @@ function BookContent() {
         title: "خطا در ذخیره کتاب",
         duration: 5000,
       });
+    }
+
+    const formData = new FormData();
+
+    formData.append("BookName", bookName.trim());
+    formData.append("Grade", String(selectedGrade.id));
+
+    if (bookImage instanceof File) {
+      formData.append("Picture", bookImage);
     }
   };
 
@@ -564,18 +574,23 @@ function BookContent() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between px-12 mt-8">
+      <div
+        dir="rtl"
+        className="mt-6 flex flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-12"
+      >
         <p className="text-sm text-gray-500 dark:text-white">
           تعداد کل کتاب‌ها :
-          <span className="font-bold text-violet-700"> {totalCount}</span>
+          <span className="font-bold text-violet-700">{totalCount}</span>
         </p>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => getBooks(currentPage - 1)}
+            onClick={() => getQuestions(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="rounded-lg border bg-white dark:bg-violet-900 dark:text-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border bg-white px-3 py-2 text-sm
+        text-gray-700 disabled:cursor-not-allowed disabled:opacity-50
+        dark:border-slate-700 dark:bg-violet-900 dark:text-white"
           >
             قبلی
           </button>
@@ -588,11 +603,11 @@ function BookContent() {
                 onClick={() => getBooks(page)}
                 className={`h-8 w-8 rounded-lg text-sm ${
                   currentPage === page
-                    ? "bg-violet-700 text-white dark:bg-violet-900 dark:border dark:border-white"
-                    : "border bg-white text-gray-600"
-                }`}
+                    ? "bg-violet-700 text-white dark:bg-violet-900 dark:ring-1 dark:ring-white"
+                    : "border bg-white text-gray-600 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                } disabled:cursor-not-allowed`}
               >
-                {page}
+                {page.toLocaleString("fa-IR")}
               </button>
             ),
           )}
@@ -601,7 +616,9 @@ function BookContent() {
             type="button"
             onClick={() => getBooks(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="rounded-lg border bg-white dark:bg-violet-900 dark:text-white px-3 py-1 text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border bg-white px-3 py-2 text-sm
+        text-gray-700 disabled:cursor-not-allowed disabled:opacity-50
+        dark:border-slate-700 dark:bg-violet-900 dark:text-white"
           >
             بعدی
           </button>
@@ -743,18 +760,16 @@ function BookContent() {
                       />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-2 gap-5">
                     <DropDown
-                      name="مقطع تحصیلی"
+                      name="سال تحصیلی"
                       labelOn
-                      items={levelItems}
-                      value={selectedLevel}
-                      onChange={setSelectedLevel}
-                      placeholder="انتخاب کنید"
-                      BackIcon={GraduationCap}
+                      items={yearItems}
+                      value={selectedYear}
+                      onChange={setSelectedYear}
+                      placeholder="1403-1404"
+                      BackIcon={CalendarDays}
                     />
-
                     <DropDown
                       name="پایه"
                       labelOn
@@ -765,85 +780,7 @@ function BookContent() {
                       BackIcon={Layers}
                     />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-5">
-                    <DropDown
-                      name="رشته / گرایش"
-                      labelOn
-                      items={fieldItems}
-                      value={selectedField}
-                      onChange={setSelectedField}
-                      placeholder="انتخاب کنید"
-                      BackIcon={Users}
-                    />
-
-                    <DropDown
-                      name="سال تحصیلی"
-                      labelOn
-                      items={yearItems}
-                      value={selectedYear}
-                      onChange={setSelectedYear}
-                      placeholder="1403-1404"
-                      BackIcon={CalendarDays}
-                    />
-                  </div>
-
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-white">
-                      وضعیت
-                    </label>
-
-                    <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-gray-200">
-                      {[
-                        ["active", "فعال"],
-                        ["inactive", "غیرفعال"],
-                        ["archive", "آرشیو"],
-                      ].map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setStatus(value)}
-                          className={`h-11 text-sm font-bold transition ${
-                            status === value
-                              ? "bg-violet-950 text-white"
-                              : "bg-white text-gray-400 hover:bg-gray-50 dark:bg-violet-800 dark:hover:bg-violet-900 dark:hover:text-white"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-gray-700">
-                      دروس مرتبط
-                    </label>
-
-                    <DropDown
-                      items={lessonItems}
-                      value={null}
-                      onChange={(item) => {
-                        if (!item) return;
-
-                        setSelectedLessons((prev) => {
-                          const exists = prev.some(
-                            (lesson) => lesson.id === item.id,
-                          );
-
-                          if (exists) {
-                            return prev.filter(
-                              (lesson) => lesson.id !== item.id,
-                            );
-                          }
-
-                          return [...prev, item];
-                        });
-                      }}
-                      placeholder="انتخاب درس"
-                      BackIcon={ChevronDown}
-                    />
-
                     <div className="rounded-2xl mt-5 border border-gray-100 bg-gray-50/50 dark:bg-slate-900 p-4">
                       <div className="mb-4">
                         <div className="flex items-center justify-between">
@@ -938,7 +875,7 @@ function BookContent() {
 
                   <div>
                     <div className="mb-2 flex items-center justify-between">
-                      <label className="text-sm font-bold text-gray-700 dark:text-white">
+                      <label className="text-sm font-bold  dark:text-white">
                         توضیحات کتاب
                       </label>
 
@@ -951,7 +888,7 @@ function BookContent() {
                       maxLength={500}
                       rows={4}
                       placeholder="توضیحات، نکات یا اطلاعات تکمیلی درباره این کتاب را وارد کنید..."
-                      className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition placeholder:text-gray-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                      className="w-full resize-none rounded-xl dark:text-white border border-gray-200 px-4 py-3 text-sm outline-none transition placeholder:text-gray-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
                     />
 
                     <div className="mt-1 text-left text-[11px] text-gray-400">

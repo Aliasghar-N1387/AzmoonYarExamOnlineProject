@@ -150,8 +150,8 @@ function LatestActivities({ Cardinfo }) {
   return (
     <>
       <div
-        className="bg-white rounded-lg border border-gray-300 p-6 text-right h-65  dark:border-slate-700
-           dark:bg-slate-900 shadow-md shadow-gray-800/10 dark:shadow-black/30"
+        className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-right dark:border-slate-700
+           dark:bg-slate-900 dark:shadow-black/30"
         dir="rtl"
       >
         {/* Header */}

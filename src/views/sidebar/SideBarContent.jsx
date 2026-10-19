@@ -127,12 +127,28 @@ function SideBarContent({ collapsed, setCollapsed, darkMode }) {
 
   return (
     <div
-      className="flex h-full flex-col bg-violet-50 dark:bg-slate-950 bg-cover bg-center bg-no-repeat px-3 py-4 transition-all duration-300"
+      className="relative isolate flex h-full flex-col overflow-hidden
+    bg-violet-50 dark:bg-slate-950
+    px-3 py-4 transition-colors duration-300"
       dir="rtl"
-      style={{
-        backgroundImage: darkMode ? `url(${bgsidbarDark}` : `url(${bgsidebar})`,
-      }}
     >
+      {/* عکس پس‌زمینه حالت روشن */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10
+      bg-cover bg-center bg-no-repeat dark:hidden"
+        style={{
+          backgroundImage: `url(${bgsidebar})`,
+        }}
+      />
+
+      {/* عکس پس‌زمینه حالت تاریک */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10
+      hidden bg-cover bg-center bg-no-repeat dark:block"
+        style={{
+          backgroundImage: `url(${bgsidbarDark})`,
+        }}
+      />
       <div className="flex justify-center py-2 mb-4 text-right">
         {!collapsed && (
           <div className="mt-4">

@@ -45,7 +45,7 @@ function CalendarDate() {
 
   return (
     <div
-      className="bg-white border border-gray-300 rounded-lg p-5 w-100 text-right dark:bg-slate-900 dark:border-slate-700"
+      className="bg-white border shadow-sm border-gray-200 rounded-xl p-5 w-100 text-right dark:bg-slate-900 dark:border-slate-700"
       dir="rtl"
     >
       {/* Header */}

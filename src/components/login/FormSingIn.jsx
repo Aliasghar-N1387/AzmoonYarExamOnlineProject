@@ -7,6 +7,7 @@ import { useState } from "react";
 import loginCrud from "../../api/loginCrud";
 import { useToast } from "../custom/Toast";
 import auth from "../../api/auth";
+import { useGoogleLogin } from "@react-oauth/google";
 
 function FormSingIn({ title, subtitle, onSingUp }) {
   const toast = useToast();
@@ -208,6 +209,89 @@ function FormSingIn({ title, subtitle, onSingUp }) {
     setShowPassword((prev) => !prev);
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+
+        // ارسال توکن گوگل به بک‌اند
+        const response = await loginCrud.loginWithGoogle({
+          idtoken: tokenResponse.access_token,
+        });
+
+        const result = await response.JSON()
+
+        if (!response.ok) {
+          throw new Error(result?.message || "ورود با گوگل ناموفق بود");
+        }
+
+        console.log("Google login response:", result);
+
+        // این بخش را مطابق ساختار پاسخ بک‌اند تنظیم کن
+        if (result.success && result.data) {
+          const {
+            accessToken,
+            refreshToken,
+            accessTokenExpireTime,
+            refreshTokenExpireTime,
+            user,
+          } = result.data;
+
+          if (accessToken) {
+            localStorage.setItem("accessToken", accessToken);
+          }
+
+          if (refreshToken) {
+            localStorage.setItem("refreshToken", refreshToken);
+          }
+
+          if (accessTokenExpireTime) {
+            localStorage.setItem(
+              "accessTokenExpireTime",
+              accessTokenExpireTime,
+            );
+          }
+
+          if (refreshTokenExpireTime) {
+            localStorage.setItem(
+              "refreshTokenExpireTime",
+              refreshTokenExpireTime,
+            );
+          }
+
+          if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+          }
+
+          toast.success("ورود با موفقیت انجام شد", {
+            title: "خوش آمدید 🎉",
+            duration: 1500,
+          });
+
+          navigate("/dashboard");
+        } else {
+          throw new Error(result?.message || "پاسخ ورود از سرور معتبر نیست");
+        }
+      } catch (error) {
+        console.error("Google login error:", error);
+
+        toast.error(error.message || "خطا در ورود با گوگل", {
+          title: "خطای ورود",
+          duration: 5000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+
+    onError: () => {
+      toast.error("دریافت توکن گوگل ناموفق بود", {
+        title: "خطای ورود",
+        duration: 5000,
+      });
+    },
+  });
+
   return (
     <div className="absolute -left-50 top-10 bg-white rounded-3xl w-150 h-200 p-7 shadow-[0_0_45px_rgba(0,0,0,0.3)]">
       <div className="w-full">
@@ -313,8 +397,15 @@ function FormSingIn({ title, subtitle, onSingUp }) {
 
           <button
             type="button"
-            className="w-full h-12 rounded-lg font-[Vazir] bg-white border-2 border-gray-400 text-lg font-bold text-gray-600 flex justify-center items-center cursor-pointer transition-all duration-300 hover:border-violet-500 hover:text-violet-800 hover:bg-violet-50 active:scale-[0.98]
-            "
+            onClick={() => googleLogin()}
+            disabled={loading}
+            className="w-full h-12 rounded-lg font-[Vazir]
+            bg-white border-2 border-gray-400 text-lg
+            font-bold text-gray-600 flex justify-center
+            items-center cursor-pointer transition-all
+            hover:border-violet-500 hover:text-violet-800
+            hover:bg-violet-50 active:scale-[0.98]
+            disabled:opacity-50"
           >
             <img
               src={GoogleIcon}
