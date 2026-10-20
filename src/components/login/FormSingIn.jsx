@@ -7,7 +7,7 @@ import { useState } from "react";
 import loginCrud from "../../api/loginCrud";
 import { useToast } from "../custom/Toast";
 import auth from "../../api/auth";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 
 function FormSingIn({ title, subtitle, onSingUp }) {
   const toast = useToast();
@@ -142,16 +142,16 @@ function FormSingIn({ title, subtitle, onSingUp }) {
     setShowPassword((prev) => !prev);
   };
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+  <GoogleLogin
+    onSuccess={async (credentialResponse) => {
       try {
         setLoading(true);
 
         const response = await loginCrud.loginWithGoogle({
-          idtoken: tokenResponse.access_token,
+          idtoken: credentialResponse.credential,
         });
 
-        const result = await response.JSON()
+        const result = await response.json();
 
         if (!response.ok) {
           throw new Error(result?.message || "ورود با گوگل ناموفق بود");
@@ -159,7 +159,6 @@ function FormSingIn({ title, subtitle, onSingUp }) {
 
         console.log("Google login response:", result);
 
-        // این بخش را مطابق ساختار پاسخ بک‌اند تنظیم کن
         if (result.success && result.data) {
           const {
             accessToken,
@@ -169,13 +168,8 @@ function FormSingIn({ title, subtitle, onSingUp }) {
             user,
           } = result.data;
 
-          if (accessToken) {
-            localStorage.setItem("accessToken", accessToken);
-          }
-
-          if (refreshToken) {
-            localStorage.setItem("refreshToken", refreshToken);
-          }
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
 
           if (accessTokenExpireTime) {
             localStorage.setItem(
@@ -195,18 +189,10 @@ function FormSingIn({ title, subtitle, onSingUp }) {
             localStorage.setItem("user", JSON.stringify(user));
           }
 
-          toast.success("ورود با موفقیت انجام شد", {
-            title: "خوش آمدید 🎉",
-            duration: 1500,
-          });
-
           navigate("/dashboard");
-        } else {
-          throw new Error(result?.message || "پاسخ ورود از سرور معتبر نیست");
         }
       } catch (error) {
         console.error("Google login error:", error);
-
         toast.error(error.message || "خطا در ورود با گوگل", {
           title: "خطای ورود",
           duration: 5000,
@@ -214,15 +200,41 @@ function FormSingIn({ title, subtitle, onSingUp }) {
       } finally {
         setLoading(false);
       }
-    },
-
-    onError: () => {
+    }}
+    onError={() => {
       toast.error("دریافت توکن گوگل ناموفق بود", {
         title: "خطای ورود",
         duration: 5000,
       });
-    },
-  });
+    }}
+  />;
+
+  
+const googleLogin = useGoogleLogin({
+  flow: "implicit",
+
+  onSuccess: async (tokenResponse) => {
+    try {
+      setLoading(true);
+
+      // این توکن access_token است، نه id_token
+      console.log("Google access token received:", !!tokenResponse.access_token);
+
+      // برای اعتبارسنجی با GoogleJsonWebSignature
+      // نباید access_token را ارسال کنیم.
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("خطا در ورود با گوگل");
+    } finally {
+      setLoading(false);
+    }
+  },
+
+  onError: () => {
+    toast.error("دریافت توکن گوگل ناموفق بود");
+  },
+});
+
 
   return (
     <div className="absolute -left-50 top-10 bg-white rounded-3xl w-150 h-200 p-7 shadow-[0_0_45px_rgba(0,0,0,0.3)]">
