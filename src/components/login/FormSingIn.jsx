@@ -7,7 +7,7 @@ import { useState } from "react";
 import loginCrud from "../../api/loginCrud";
 import { useToast } from "../custom/Toast";
 import auth from "../../api/auth";
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 
 function FormSingIn({ title, subtitle, onSingUp }) {
   const toast = useToast();
@@ -209,32 +209,96 @@ function FormSingIn({ title, subtitle, onSingUp }) {
     }}
   />;
 
-  
-const googleLogin = useGoogleLogin({
-  flow: "implicit",
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (loading) return;
 
-  onSuccess: async (tokenResponse) => {
     try {
       setLoading(true);
 
-      // این توکن access_token است، نه id_token
-      console.log("Google access token received:", !!tokenResponse.access_token);
+      const idToken = credentialResponse.credential;
 
-      // برای اعتبارسنجی با GoogleJsonWebSignature
-      // نباید access_token را ارسال کنیم.
+      if (!idToken) {
+        throw new Error("توکن گوگل دریافت نشد");
+      }
+
+      const response = await loginCrud.loginWithGoogle({
+        idtoken: idToken,
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success || !result?.data) {
+        throw new Error(result?.message || "ورود با گوگل ناموفق بود");
+      }
+
+      const {
+        accessToken,
+        refreshToken,
+        accessTokenExpireTime,
+        refreshTokenExpireTime,
+        user,
+      } = result.data;
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      if (accessTokenExpireTime) {
+        localStorage.setItem("accessTokenExpireTime", accessTokenExpireTime);
+      }
+
+      if (refreshTokenExpireTime) {
+        localStorage.setItem("refreshTokenExpireTime", refreshTokenExpireTime);
+      }
+
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      toast.success("ورود با موفقیت انجام شد", {
+        title: "خوش آمدید",
+        duration: 1500,
+      });
+
+      navigate("/dashboard");
     } catch (error) {
       console.error("Google login error:", error);
-      toast.error("خطا در ورود با گوگل");
+
+      toast.error(error.message || "خطا در ورود با گوگل", {
+        title: "خطای ورود",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
-  },
+  };
 
-  onError: () => {
-    toast.error("دریافت توکن گوگل ناموفق بود");
-  },
-});
+  const googleLogin = useGoogleLogin({
+    flow: "implicit",
 
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+
+        // این توکن access_token است، نه id_token
+        console.log(
+          "Google access token received:",
+          !!tokenResponse.access_token,
+        );
+
+        // برای اعتبارسنجی با GoogleJsonWebSignature
+        // نباید access_token را ارسال کنیم.
+      } catch (error) {
+        console.error("Google login error:", error);
+        toast.error("خطا در ورود با گوگل");
+      } finally {
+        setLoading(false);
+      }
+    },
+
+    onError: () => {
+      toast.error("دریافت توکن گوگل ناموفق بود");
+    },
+  });
 
   return (
     <div className="absolute -left-50 top-10 bg-white rounded-3xl w-150 h-200 p-7 shadow-[0_0_45px_rgba(0,0,0,0.3)]">
@@ -331,6 +395,7 @@ const googleLogin = useGoogleLogin({
           </button>
 
           {/* Google */}
+
           <div className="px-2 py-10 relative">
             <hr className="border-gray-300" />
 
@@ -339,26 +404,23 @@ const googleLogin = useGoogleLogin({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => googleLogin()}
-            disabled={loading}
-            className="w-full h-12 rounded-lg font-[Vazir]
-            bg-white border-2 border-gray-400 text-lg
-            font-bold text-gray-600 flex justify-center
-            items-center cursor-pointer transition-all
-            hover:border-violet-500 hover:text-violet-800
-            hover:bg-violet-50 active:scale-[0.98]
-            disabled:opacity-50"
-          >
-            <img
-              src={GoogleIcon}
-              alt="Google"
-              className="size-6 object-contain"
+          <div className="relative flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                toast.error("دریافت توکن گوگل ناموفق بود", {
+                  title: "خطای ورود",
+                  duration: 5000,
+                });
+              }}
+              useOneTap={false}
+              text="signin_with"
+              shape="rectangular"
+              theme="outline"
+              size="large"
+              width="400"
             />
-
-            <span className="pl-2.5">ورود با گوگل</span>
-          </button>
+          </div>
         </div>
 
         {/* Signup */}
