@@ -145,6 +145,17 @@ const createFillInBlankAnswers = (itemId, data) => {
   );
 };
 
+const createMatchingItems = async (questionId, data) => {
+  return fetch(`${API_URL}v1/question/${questionId}/matching-items`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getAccessToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+};
+
 export default {
   getQuestions,
   getBooks,
@@ -155,4 +166,5 @@ export default {
   createTrueFalseItem,
   createFillInBlankItems,
   createFillInBlankAnswers,
+  createMatchingItems
 };

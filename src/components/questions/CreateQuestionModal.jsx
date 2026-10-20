@@ -215,7 +215,6 @@ function CreateQuestionModal({ onClose, onSave }) {
     setError("");
   };
 
-  // ویرایش یک پاسخ از یک جای خالی مشخص
   const updateBlank = (blankId, answerIndex, value) => {
     setBlankAnswers((prev) =>
       prev.map((blank) =>
@@ -241,7 +240,6 @@ function CreateQuestionModal({ onClose, onSave }) {
     );
   };
 
-  // حذف یک پاسخ جایگزین
   const removeBlankAnswer = (blankId, answerIndex) => {
     setBlankAnswers((prev) =>
       prev.map((blank) =>
@@ -447,11 +445,11 @@ function CreateQuestionModal({ onClose, onSave }) {
     setError("");
   };
 
-  useEffect(() => {
-    console.log("📝 همه سؤال‌های جای خالی:", blankQuestions);
-    console.log("🆔 شناسه سؤال فعال:", activeBlankQuestionId);
-    console.log("📌 سؤال فعال:", activeBlankQuestion);
-  }, [blankQuestions, activeBlankQuestionId, activeBlankQuestion]);
+  useEffect(() => {}, [
+    blankQuestions,
+    activeBlankQuestionId,
+    activeBlankQuestion,
+  ]);
 
   useEffect(() => {
     if (pendingCaretRef.current === null) return;
@@ -916,6 +914,97 @@ function CreateQuestionModal({ onClose, onSave }) {
     }
   };
 
+  const handleCreateMatchingQuestion = async () => {
+    if (!questionText.trim()) {
+      setError("لطفاً متن سؤال را وارد کنید.");
+      return;
+    }
+
+    if (!lesson?.id) {
+      setError("لطفاً ابتدا درس را انتخاب کنید.");
+      return;
+    }
+
+    if (
+      pairs.length < 2 ||
+      pairs.some((pair) => !pair.left.trim() || !pair.right.trim())
+    ) {
+      setError("لطفاً حداقل دو جفت مرتبط را کامل کنید.");
+      return;
+    }
+
+    try {
+      setError("");
+
+      // درخواست اول: ایجاد سؤال اصلی
+      const questionPayload = {
+        lessonId: Number(lesson.id),
+        questionText: questionText.trim(),
+        difficultyLevel: Number(difficulty?.id ?? difficulty),
+        questionType: 3,
+      };
+
+      const questionResponse =
+        await questionCrud.createQuestion(questionPayload);
+
+      const questionResult = await questionResponse.json().catch(() => null);
+
+      if (!questionResponse.ok || questionResult?.success === false) {
+        throw new Error(
+          questionResult?.error?.title || "ایجاد سؤال وصل‌کردنی ناموفق بود.",
+        );
+      }
+
+      const questionId =
+        questionResult?.data?.id ??
+        questionResult?.data?.questionId ??
+        questionResult?.id ??
+        questionResult?.questionId;
+
+      if (!questionId) {
+        throw new Error("شناسه سؤال از پاسخ سرور دریافت نشد.");
+      }
+
+      const matchingItemsPayload = pairs.map((pair) => ({
+        leftItemText: pair.left.trim(),
+        rightItemText: pair.right.trim(),
+      }));
+
+      const itemsResponse = await questionCrud.createMatchingItems(
+        questionId,
+        matchingItemsPayload,
+      );
+
+      const itemsResult = await itemsResponse.json().catch(() => null);
+
+      if (!itemsResponse.ok || itemsResult?.success === false) {
+        throw new Error(
+          itemsResult?.error?.title ||
+            itemsResult?.message ||
+            "ثبت آیتم‌های وصل‌کردنی ناموفق بود.",
+        );
+      }
+
+      toast.success("سؤال وصل‌کردنی با موفقیت ثبت شدند");
+
+      onSave?.({
+        ...questionPayload,
+        id: questionId,
+        pairs,
+      });
+
+      onClose?.();
+    } catch (err) {
+      console.error("Create matching question error:", err);
+
+      setError(err.message || "ثبت سؤال وصل‌کردنی با خطا مواجه شد.");
+    }
+  };
+
+  const handleRemovePair = (index) => {
+    setPairs((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <Modal
       onClose={onClose}
@@ -1147,7 +1236,7 @@ function CreateQuestionModal({ onClose, onSave }) {
                 />
               </div>
             )}
-            
+
             {activeType === 2 && (
               <div>
                 <div className="space-y-3">
@@ -1344,27 +1433,35 @@ function CreateQuestionModal({ onClose, onSave }) {
                 </div>
 
                 {pairs.map((pair, index) => (
-                  <div key={pair.id} className="grid grid-cols-2 gap-3">
+                  <div key={index} className="flex items-center gap-3 mb-4">
                     <input
                       value={pair.left}
                       onChange={(e) =>
-                        updatePair(pair.id, "left", e.target.value)
+                        handlePairChange(index, "left", e.target.value)
                       }
-                      placeholder={`مورد ${index + 1}`}
-                      className={inputClass}
+                      placeholder="متن ستون چپ"
+                      className="border rounded p-2 flex-1"
                     />
 
                     <input
                       value={pair.right}
                       onChange={(e) =>
-                        updatePair(pair.id, "right", e.target.value)
+                        handlePairChange(index, "right", e.target.value)
                       }
-                      placeholder={`پاسخ ${index + 1}`}
-                      className={inputClass}
+                      placeholder="متن ستون راست"
+                      className="border rounded p-2 flex-1"
                     />
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePair(index)}
+                      disabled={pairs.length <= 2}
+                      className="bg-red-500 text-white px-3 py-2 rounded disabled:opacity-40"
+                    >
+                      حذف
+                    </button>
                   </div>
                 ))}
-
                 <button
                   type="button"
                   onClick={() =>
@@ -1595,6 +1692,8 @@ function CreateQuestionModal({ onClose, onSave }) {
                   handleCreateEssayQuestion();
                 } else if (activeType === 2) {
                   handleCreateFillInBlankQuestion();
+                } else if (activeType === 3) {
+                  handleCreateMatchingQuestion();
                 } else if (activeType === 4) {
                   handleCreateTestQuestion();
                 } else if (activeType === 5) {
